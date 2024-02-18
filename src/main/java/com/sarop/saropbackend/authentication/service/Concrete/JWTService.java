@@ -1,5 +1,6 @@
 package com.sarop.saropbackend.authentication.service.Concrete;
 
+import com.sarop.saropbackend.user.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -10,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.security.Key;
@@ -17,9 +19,15 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class JWTService  implements Serializable {
-    @Value("${jwt.signing.key}")
+
+    @Value("${application.security.jwt.expiration}")
+    private long TOKEN_VALIDITY;
+
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long REFRESH_TOKEN_EXPIRATION;
+    @Value("${application.security.jwt.secret-key}")
     private String SIGNING_KEY;
     public String extractUsername(String token) {
         return extractClaim(token,Claims::getSubject);
@@ -40,7 +48,7 @@ public class JWTService  implements Serializable {
     public String generateToken(Map<String,Object> extraClaims, UserDetails userDetails){
         return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername()).
                 setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + (1000*64*24))).signWith(getSigninKey(),SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY)).signWith(getSigninKey(),SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -60,6 +68,27 @@ public class JWTService  implements Serializable {
     private Key getSigninKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SIGNING_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String generateRefreshToken(
+            UserDetails userDetails
+    ) {
+        return buildToken(new HashMap<>(), userDetails, REFRESH_TOKEN_EXPIRATION);
+    }
+
+    private String buildToken(
+            Map<String, Object> extraClaims,
+            UserDetails userDetails,
+            long expiration
+    ) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigninKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     /*

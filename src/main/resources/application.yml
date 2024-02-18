@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sarop
+    username: postgres
+    password: 12345
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+application:
+  security:
+    jwt:
+      secret-key: 35448b734e6159c4fdd39ce996ecbcd783548aa5f75ed00d75e29749ff6c3783
+      expiration: 86400000 # a day
+      token:
+        prefix: Bearer
+      header:
+        string: Authorization
+      refresh-token:
+        expiration: 604800000 # 7 days
+
+
