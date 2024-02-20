@@ -1,6 +1,5 @@
 package com.sarop.saropbackend.config;
 
-import com.sarop.saropbackend.authentication.service.Concrete.JWTService;
 import com.sarop.saropbackend.token.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
