@@ -3,7 +3,6 @@ package com.sarop.saropbackend.config;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -17,6 +16,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
+import static com.sarop.saropbackend.user.model.Role.ADMIN;
+
 
 @Configuration
 @EnableWebSecurity
@@ -24,7 +25,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-
+    private final String[] WHITE_LIST = {"/auth/**","/users/**"};
     private final JWTAuthenticationFilter jwtAuthFilter;
 
     private final AuthenticationProvider authenticationProvider;
@@ -37,7 +38,7 @@ public class SecurityConfiguration {
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(customizer -> customizer
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(WHITE_LIST).permitAll().requestMatchers("/admin/**").hasAnyRole(ADMIN.name())
                         .anyRequest().authenticated()).sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter,UsernamePasswordAuthenticationFilter.class)
