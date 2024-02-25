@@ -5,12 +5,10 @@ import com.sarop.saropbackend.authentication.dto.AuthenticationResponse;
 import com.sarop.saropbackend.authentication.dto.LoginRequest;
 import com.sarop.saropbackend.authentication.dto.RegisterRequest;
 import com.sarop.saropbackend.authentication.service.Abstract.AuthenticationService;
-import com.sarop.saropbackend.authentication.service.Abstract.LogoutService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +24,7 @@ public class AuthController {
 
     private final AuthenticationService authenticationService;
 
-    private final LogoutService logoutService;
+
 
 
 
@@ -53,9 +51,5 @@ public class AuthController {
     }
 
 
-    @PostMapping("/logout")
-    public void logout(HttpServletRequest request,
-                                    HttpServletResponse response, Authentication authentication){
-        logoutService.logout(request, response, authentication);
-    }
+
 }

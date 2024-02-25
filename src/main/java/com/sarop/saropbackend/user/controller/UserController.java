@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -27,24 +28,12 @@ public class UserController {
     }
 
     @GetMapping("/findAll")
-    public ResponseEntity<?> findAllUsers(){
-        return ResponseEntity.ok(service.findAllUser());
+    public ResponseEntity<?> findAllUsers(@RequestParam(required = false) Optional<String> email,
+                                           @RequestParam(required = false) Optional<String> id){
+        return ResponseEntity.ok(service.findAllUser(email,id));
     }
 
-    // Listeleme sayfasında filtreleme yapmak
-    @GetMapping("/find")
-    public ResponseEntity<?> findUser(
-            @RequestParam(required = false) String id,
-            @RequestParam(required = false) String email
-    ){
-        if (id != null) {
-            return ResponseEntity.ok(service.findById(id));
-        } else if (email != null) {
-            return ResponseEntity.ok(service.findByEmail(email));
-        } else {
-            return ResponseEntity.badRequest().body("Please provide either id or email parameter");
-        }
-    }
+
 
 
 }
