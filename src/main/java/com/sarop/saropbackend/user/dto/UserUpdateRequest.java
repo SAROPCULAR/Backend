@@ -13,7 +13,7 @@ public class UserUpdateRequest {
     @NotBlank
     private String firstName;
 
-    @NotBlank // NotNull, NotEmpty ile farkı
+    @NotBlank
     private String lastName;
 
     @Email
