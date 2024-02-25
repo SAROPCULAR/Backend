@@ -9,5 +9,5 @@ public interface AdminService {
     User saveUser(UserSaveRequest userSaveRequest);
     User updateUser(String id, UserUpdateRequest userUpdateRequest);
 
-    void deleteUser(String email);
+    void deleteUser(String id);
 }

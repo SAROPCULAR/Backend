@@ -2,25 +2,27 @@ package com.sarop.saropbackend.user.dto;
 
 import com.sarop.saropbackend.user.model.Role;
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 public class UserUpdateRequest {
 
+    @NotBlank
     private String firstName;
 
+    @NotBlank // NotNull, NotEmpty ile farkı
     private String lastName;
 
     @Email
+    @NotBlank
     private String email;
 
+    @NotBlank
     private String password;
 
+    @NotNull
     private Role role;
 }
