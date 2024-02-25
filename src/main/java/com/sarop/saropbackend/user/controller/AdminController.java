@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyAuthority('ADMIN')")
 @RequestMapping("admin")
 @RequiredArgsConstructor
 public class AdminController {
@@ -27,9 +27,9 @@ public class AdminController {
         return ResponseEntity.ok(adminService.updateUser(id,userUpdateRequest));
     }
 
-    @DeleteMapping("/delete/{email}")
-    public ResponseEntity deleteUser(@PathVariable String email){
-        adminService.deleteUser(email);
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteUser(@PathVariable String id){
+        adminService.deleteUser(id);
         return ResponseEntity.ok().build();
     }
 

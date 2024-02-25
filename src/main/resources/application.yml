@@ -25,5 +25,7 @@ application:
         string: Authorization
       refresh-token:
         expiration: 604800000 # 7 days
+server:
+  port: 8082
 
 

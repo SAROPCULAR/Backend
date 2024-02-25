@@ -18,40 +18,26 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
 
 
-    public User saveUser(UserSaveRequest userSaveRequest){
+    public User saveUser(UserSaveRequest userSaveRequest) {
         var user = User.builder().firstName(userSaveRequest.getFirstName()).lastName(userSaveRequest.getLastName()).
                 email(userSaveRequest.getEmail()).password(userSaveRequest.getPassword()).role(userSaveRequest.getRole()).build();
         return userRepository.save(user);
     }
 
-    public User updateUser(String id, UserUpdateRequest userUpdateRequest){
+    public User updateUser(String id, UserUpdateRequest userUpdateRequest) {
         User user = userRepository.findById(id).orElseThrow();
-        if(userUpdateRequest.getFirstName() != null){
-            user.setFirstName(userUpdateRequest.getFirstName());
-        }
-        if(userUpdateRequest.getLastName() != null){
-            user.setLastName(userUpdateRequest.getLastName());
-        }
-        if(userUpdateRequest.getEmail() != null){
-            user.setEmail(userUpdateRequest.getEmail());
-        }
-        if(userUpdateRequest.getPassword() != null){
-            user.setEmail(userUpdateRequest.getPassword());
-        }
-        if(userUpdateRequest.getPassword() != null){
-            user.setPassword(userUpdateRequest.getPassword());
-        }
+        user.setFirstName(userUpdateRequest.getFirstName());
+        user.setLastName(userUpdateRequest.getLastName());
+        user.setEmail(userUpdateRequest.getEmail());
+        user.setPassword(userUpdateRequest.getPassword());
+
         return userRepository.save(user);
     }
 
-    public void deleteUser(String email){
-        User user = userRepository.findByEmail(email).orElseThrow();
+    public void deleteUser(String id) {
+        User user = userRepository.findById(id).orElseThrow();
         userRepository.delete(user);
     }
-
-
-
-
 
 
 }

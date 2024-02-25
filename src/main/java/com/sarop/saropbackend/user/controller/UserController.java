@@ -4,13 +4,15 @@ import com.sarop.saropbackend.user.dto.ChangePasswordRequest;
 import com.sarop.saropbackend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
 @RestController
-@RequestMapping("users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('ADMIN','USER')")
 public class UserController {
 
     private final UserService service;
@@ -29,13 +31,20 @@ public class UserController {
         return ResponseEntity.ok(service.findAllUser());
     }
 
-    @GetMapping("/find/{id}")
-    public ResponseEntity<?> findById(@PathVariable String id){
-        return ResponseEntity.ok(service.findById(id));
+    // Listeleme sayfasında filtreleme yapmak
+    @GetMapping("/find")
+    public ResponseEntity<?> findUser(
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) String email
+    ){
+        if (id != null) {
+            return ResponseEntity.ok(service.findById(id));
+        } else if (email != null) {
+            return ResponseEntity.ok(service.findByEmail(email));
+        } else {
+            return ResponseEntity.badRequest().body("Please provide either id or email parameter");
+        }
     }
 
-    @GetMapping("/find/{email}")
-    public ResponseEntity<?> findByEmail(@PathVariable String email){
-        return ResponseEntity.ok(service.findByEmail(email));
-    }
+
 }
