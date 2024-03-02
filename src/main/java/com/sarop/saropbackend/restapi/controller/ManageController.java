@@ -1,0 +1,31 @@
+package com.sarop.saropbackend.restapi.controller;
+
+import com.sarop.saropbackend.restapi.service.ManageService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/manage")
+@RequiredArgsConstructor
+public class ManageController {
+
+    private final ManageService manageService;
+
+
+    @GetMapping("/workspaces")
+    public List<String> getWorkspaces() {
+
+        return manageService.getWorkSpaces();
+    }
+    @PostMapping("/workspaces")
+    public void postWorkspace(@RequestBody String workSpaceName) {
+        manageService.postWorkspace(workSpaceName);
+
+    }
+
+}
