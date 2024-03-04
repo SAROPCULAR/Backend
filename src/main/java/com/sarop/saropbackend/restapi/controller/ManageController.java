@@ -22,9 +22,17 @@ public class ManageController {
 
         return manageService.getWorkSpaces();
     }
+
+
     @PostMapping("/workspaces")
     public void postWorkspace(@RequestBody String workSpaceName) {
         manageService.postWorkspace(workSpaceName);
+
+    }
+    @DeleteMapping("/workspaces/{workspaceName}")
+    public void deleteWorkSpace(@PathVariable("workspaceName") String workSpaceName) {
+        manageService.deleteWorkSpace(workSpaceName);
+
 
     }
 

@@ -60,7 +60,6 @@ public class ManageService {
         }
     }
     public void postWorkspace(String workspaceName) {
-        String url = geoserverUrl + "/workspaces";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBasicAuth(username, password);
@@ -70,11 +69,27 @@ public class ManageService {
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                url,
+                geoserverUrl + "/workspaces",
                 HttpMethod.POST,
                 entity,
                 String.class);
 
         System.out.println("Response: " + response.getBody());
+    }
+
+
+    public void deleteWorkSpace(String workSpaceName) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBasicAuth(username, password);
+        String url = "http://localhost:8080/workspaces/" + workSpaceName;
+        ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
+        if (response.getStatusCode().is2xxSuccessful()) {
+
+            System.out.println("Workspace başarıyla silindi: " + workSpaceName);
+        } else {
+
+            System.err.println("Workspace silinirken hata oluştu: " + response.getStatusCode());
+        }
     }
 }
