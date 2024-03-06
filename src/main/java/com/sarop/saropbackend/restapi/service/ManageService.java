@@ -82,8 +82,9 @@ public class ManageService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBasicAuth(username, password);
-        String url = "http://localhost:8080/workspaces/" + workSpaceName;
-        ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName;
+        ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
         if (response.getStatusCode().is2xxSuccessful()) {
 
             System.out.println("Workspace başarıyla silindi: " + workSpaceName);
