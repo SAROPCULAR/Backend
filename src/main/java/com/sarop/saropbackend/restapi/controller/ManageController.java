@@ -35,5 +35,16 @@ public class ManageController {
 
 
     }
+    @GetMapping("/workspaces/{workspaceName}/layers")
+    public List<String> getWorkspaces(@PathVariable("workspaceName") String workSpaceName) {
+
+        return manageService.getLayersByWorkspaces(workSpaceName);
+    }
+    @DeleteMapping("/workspaces/{workspaceName}/layers/{layerName}")
+    public void deleteWorkSpace(@PathVariable("workspaceName") String workSpaceName,@PathVariable("layerName") String layerName) {
+        manageService.deleteLayer(workSpaceName,layerName);
+
+
+    }
 
 }

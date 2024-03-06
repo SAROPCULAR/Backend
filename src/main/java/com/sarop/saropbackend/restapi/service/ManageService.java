@@ -1,8 +1,10 @@
 package com.sarop.saropbackend.restapi.service;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ManageService {
@@ -91,6 +94,53 @@ public class ManageService {
         } else {
 
             System.err.println("Workspace silinirken hata oluştu: " + response.getStatusCode());
+        }
+    }
+
+    public List<String> getLayersByWorkspaces(String workSpaceName) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept",MediaType.APPLICATION_JSON_VALUE);
+        headers.setBasicAuth(username, password);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName+"/layers";
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        List<String> resultList = new ArrayList<>();
+        if (response.getStatusCode().is2xxSuccessful()) {
+            String responseBody = response.getBody();
+            try {
+                // Assuming Jackson ObjectMapper is available in the classpath
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(responseBody);
+                JsonNode layersNode = jsonNode.path("layers").path("layer");
+                if (layersNode.isArray()) {
+                    ArrayNode layerArrayNode = (ArrayNode) layersNode;
+                    for (JsonNode item : layerArrayNode) {
+                        String name = item.path("name").asText();
+                        resultList.add(name);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Request failed with status code: " + response.getStatusCode());
+        }
+
+        return resultList;
+    }
+    public void deleteLayer(String workSpaceName,String layerName) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBasicAuth(username, password);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName+"/layers/"+layerName;
+        ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+        if (response.getStatusCode().is2xxSuccessful()) {
+
+            System.out.println("Layer başarıyla silindi: " + layerName);
+        } else {
+
+            System.err.println("Layer silinirken hata oluştu: " + response.getStatusCode());
         }
     }
 }
