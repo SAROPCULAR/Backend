@@ -1,6 +1,8 @@
 package com.sarop.saropbackend.user.model;
 
 
+import com.sarop.saropbackend.operation.model.Operation;
+import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.token.model.Token;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,10 +28,21 @@ public class User  {
     private String email;
     @Column(nullable=false)
     private String password;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
+    private Team team;
     @Enumerated(EnumType.STRING)
     private Role role;
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
+
+    @ManyToMany
+    private List<Operation> assignedOperations;
+
+    @Column(nullable = false)
+    private UserStatus userStatus;
+
 
 
 

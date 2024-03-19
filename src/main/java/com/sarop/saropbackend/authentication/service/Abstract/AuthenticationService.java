@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public interface AuthenticationService {
      AuthenticationResponse register(RegisterRequest request);
-     AuthenticationResponse login(LoginRequest request) ;
+     AuthenticationResponse login(LoginRequest request) throws Exception;
 
      void refreshToken(
              HttpServletRequest request,

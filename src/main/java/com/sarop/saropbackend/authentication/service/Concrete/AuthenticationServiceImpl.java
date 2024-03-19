@@ -6,10 +6,10 @@ import com.sarop.saropbackend.authentication.dto.AuthenticationResponse;
 
 import com.sarop.saropbackend.authentication.dto.LoginRequest;
 import com.sarop.saropbackend.authentication.dto.RegisterRequest;
+import com.sarop.saropbackend.authentication.mapper.AuthenticationMapper;
 import com.sarop.saropbackend.authentication.service.Abstract.AuthenticationService;
 import com.sarop.saropbackend.config.JWTService;
-import com.sarop.saropbackend.user.model.Role;
-import com.sarop.saropbackend.user.model.User;
+import com.sarop.saropbackend.user.model.UserStatus;
 import com.sarop.saropbackend.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,14 +35,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final JWTService jwtService;
 
+    private final AuthenticationMapper authenticationMapper;
+
 
     public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER).build();
+        var user = authenticationMapper.registerRequestToUser(request);
         var savedUser = userRepository.save(user);
         var jwtToken = jwtService.generateToken(savedUser);
         var refreshToken = jwtService.generateRefreshToken(user);
@@ -55,10 +52,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
 
-    public AuthenticationResponse login(LoginRequest request) {
+    public AuthenticationResponse login(LoginRequest request) throws Exception {
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow();
-
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new Exception("Wrong email or password");
+        }
+        if(user.getUserStatus() == UserStatus.NOT_VERIFIED) {
+            throw new Exception("User is not verified");
+        }
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
@@ -67,9 +69,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .refreshToken(refreshToken)
                 .build();
     }
-
-
-
 
 
     public void refreshToken(

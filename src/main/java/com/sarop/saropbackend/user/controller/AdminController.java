@@ -17,6 +17,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
+
     @PostMapping("/save-user")
     public ResponseEntity<?> saveUser(@RequestBody UserSaveRequest userSaveRequest){
         return ResponseEntity.ok(adminService.saveUser(userSaveRequest));
@@ -33,5 +34,10 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/verify-user/{id}")
+    public ResponseEntity<?> verifyUser(@PathVariable String id){
+        adminService.verifyUser(id);
+        return ResponseEntity.ok().build();
+    }
 
 }

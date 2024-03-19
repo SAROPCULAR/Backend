@@ -1,5 +1,6 @@
 package com.sarop.saropbackend.user.dto;
 
+import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.user.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,4 +26,7 @@ public class UserUpdateRequest {
 
     @NotNull
     private Role role;
+
+    @NotNull
+    private Team team;
 }

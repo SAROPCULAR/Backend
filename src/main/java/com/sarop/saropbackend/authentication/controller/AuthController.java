@@ -24,10 +24,6 @@ public class AuthController {
 
     private final AuthenticationService authenticationService;
 
-
-
-
-
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request){
 
@@ -37,7 +33,7 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request){
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) throws Exception {
 
         return ResponseEntity.ok(authenticationService.login(request));
     }
