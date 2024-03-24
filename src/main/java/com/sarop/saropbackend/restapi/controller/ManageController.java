@@ -1,12 +1,10 @@
 package com.sarop.saropbackend.restapi.controller;
 
-import com.sarop.saropbackend.restapi.dto.CoverageStoreRequest;
 import com.sarop.saropbackend.restapi.service.ManageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -64,10 +62,10 @@ public class ManageController {
         return manageService.getCoverageStores(workSpaceName);
 
     }
-    @PostMapping("/workspaces/{workspaceName}/coveragestores")
+    @PostMapping("/workspaces/{workspaceName}/coveragestores2")
     public void postCoverageStore1(@PathVariable("workspaceName")String workspaceName,@RequestBody String requestBody ) {
         manageService.postCoverageStore1(workspaceName,requestBody);
-
+        System.out.println("dene");
     }
 
 

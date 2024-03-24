@@ -1,21 +1,17 @@
 package com.sarop.saropbackend.restapi.service;
 
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ManageService {
@@ -154,7 +150,7 @@ public class ManageService {
         headers.setBasicAuth(username, password);
 
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        HttpEntity<String> entity = new HttpEntity<>(url,headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
                 geoserverUrl + "/workspaces/" + workspaceName + "/coveragestores/" + store + "/" + method + "." + format,
@@ -191,19 +187,18 @@ public class ManageService {
 
 
     }
-    public void postCoverageStore1(String workspaceName, String requestBody) {
+    public void postCoverageStore1(String workspaceName, String coverageStoreRequest) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
         headers.setBasicAuth(username, password);
 
-        HttpEntity<String> entity = new HttpEntity<>(requestBody,headers);
+        HttpEntity<String> request = new HttpEntity<>(coverageStoreRequest, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                geoserverUrl + "/workspaces/" + workspaceName + "/coveragestores/",
-                HttpMethod.POST,
-                entity,
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                geoserverUrl + "/workspaces/" + workspaceName + "/coveragestores",
+                request,
                 String.class);
-
         System.out.println("Response: " + response.getBody());
     }
 }
