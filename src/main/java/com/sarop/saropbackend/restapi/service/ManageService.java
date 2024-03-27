@@ -201,4 +201,72 @@ public class ManageService {
                 String.class);
         System.out.println("Response: " + response.getBody());
     }
-}
+
+    public String postCoverageStore2(String workspace,String layerName,String fileUrl){
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBasicAuth(username, password);
+
+            // Include workspace in the JSON payload
+            String requestBody = "{\n" +
+                    "  \"coverageStore\": {\n" +
+                    "    \"name\": \"" + layerName + "\",\n" +
+                    "    \"enabled\": true,\n" +
+                    "    \"type\": \"GeoTIFF\",\n" +
+                    "    \"workspace\": \"" + workspace + "\",\n" +
+                    "    \"url\": \"" + fileUrl + "\"\n" +
+                    "  }\n" +
+                    "}";
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+
+            String apiUrl = geoserverUrl + "/workspaces/" + workspace + "/coveragestores";
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, requestEntity, String.class);
+            String coverageXml = "<coverage><nativeName>agri_final_proj</nativeName>" +
+                    "<nativeCoverageName>agri_final_proj</nativeCoverageName>" +
+                    "<enabled>true</enabled><metadata /><keywords />" +
+                    "<metadataLinks />" +
+                    "<name>" + layerName+"</name>" +
+                    "<title>" + layerName+"</title>" +
+                    "<srs>EPSG:4326</srs><projectionPolicy>REPROJECT_TO_DECLARED</projectionPolicy>" +
+                    "</coverage>";
+            addCoverage(workspace,layerName,coverageXml);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return "Coverage store added successfully";
+            } else {
+                return "Failed to add coverage store. Status code: " + response.getBody() + response.getStatusCodeValue();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    public String addCoverage(String workspace, String coverageStore, String coverageXml) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+            headers.setBasicAuth(username, password);
+
+            String apiUrl = geoserverUrl + "/workspaces/" + workspace + "/coveragestores/" + coverageStore + "/coverages";
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(coverageXml, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, requestEntity, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return "Coverage added successfully";
+            } else {
+                return "Failed to add coverage. Status code: " + response.getStatusCodeValue();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    }

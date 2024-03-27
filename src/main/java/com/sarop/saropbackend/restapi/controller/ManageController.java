@@ -1,5 +1,6 @@
 package com.sarop.saropbackend.restapi.controller;
 
+import com.sarop.saropbackend.restapi.dto.PostCoverageStoreRequest;
 import com.sarop.saropbackend.restapi.service.ManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -63,10 +64,12 @@ public class ManageController {
 
     }
     @PostMapping("/workspaces/{workspaceName}/coveragestores2")
-    public void postCoverageStore1(@PathVariable("workspaceName")String workspaceName,@RequestBody String requestBody ) {
-        manageService.postCoverageStore1(workspaceName,requestBody);
-        System.out.println("dene");
+    public void postCoverageStore1(@PathVariable("workspaceName")String workspaceName,@RequestBody PostCoverageStoreRequest request ) {
+        manageService.postCoverageStore2(workspaceName,request.getLayerName(),request.getFileUrl());
+
     }
+
+
 
 
 }
