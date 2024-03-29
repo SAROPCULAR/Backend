@@ -2,12 +2,12 @@ package com.sarop.saropbackend.restapi.controller;
 
 import com.sarop.saropbackend.restapi.dto.PostCoverageStoreRequest;
 import com.sarop.saropbackend.restapi.service.ManageService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/manage")
@@ -18,54 +18,61 @@ public class ManageController {
 
 
     @GetMapping("/workspaces")
-    public List<String> getWorkspaces() {
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    public ResponseEntity<?> getWorkspaces() {
 
-        return manageService.getWorkSpaces();
+        return ResponseEntity.ok(manageService.getWorkSpaces());
     }
 
 
     @PostMapping("/workspaces")
-    public void postWorkspace(@RequestBody String workSpaceName) {
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<?> postWorkspace(@RequestBody String workSpaceName) {
         manageService.postWorkspace(workSpaceName);
+        return ResponseEntity.ok().build();
 
     }
     @DeleteMapping("/workspaces/{workspaceName}")
-    public void deleteWorkSpace(@PathVariable("workspaceName") String workSpaceName) {
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<?> deleteWorkSpace(@PathVariable("workspaceName") String workSpaceName) {
         manageService.deleteWorkSpace(workSpaceName);
-
+        return ResponseEntity.ok().build();
 
     }
     @GetMapping("/workspaces/{workspaceName}/layers")
-    public List<String> getLayer(@PathVariable("workspaceName") String workSpaceName) {
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    public ResponseEntity<?> getLayer(@PathVariable("workspaceName") String workSpaceName) {
 
-        return manageService.getLayersByWorkspaces(workSpaceName);
+        return ResponseEntity.ok(manageService.getLayersByWorkspaces(workSpaceName));
     }
     @DeleteMapping("/workspaces/{workspaceName}/layers/{layerName}")
-    public void deleteLayer(@PathVariable("workspaceName") String workSpaceName,@PathVariable("layerName") String layerName) {
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<?> deleteLayer(@PathVariable("workspaceName") String workSpaceName,@PathVariable("layerName") String layerName) {
         manageService.deleteLayer(workSpaceName,layerName);
-
-
+        return ResponseEntity.ok().build();
     }
-    @PostMapping("/workspaces/{workspaceName}/coveragestores/{store}/{method}.{format}")
-    public void postCoverageStore(@PathVariable("workspaceName")String workspaceName, @PathVariable("store") String store, @PathVariable("method") String method,@PathVariable("format") String format,  @RequestBody  String url ) {
-        manageService.postCoverageStore(workspaceName,store,method,format,url);
-
-    }
+    /*
     @GetMapping("/workspaces/{workspaceName}/coveragestores/{store}")
-    public   ResponseEntity<String> getCoverageStore(@PathVariable("workspaceName") String workSpaceName, @PathVariable("store") String store) {
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public   ResponseEntity<?> getCoverageStore(@PathVariable("workspaceName") String workSpaceName, @PathVariable("store") String store) {
 
-        return manageService.getCoverageStore(workSpaceName,store);
+        return ResponseEntity.ok(manageService.getCoverageStore(workSpaceName,store));
     }
 
     @GetMapping("/workspaces/{workspaceName}/coveragestores")
-    public   ResponseEntity<String> getCoverageStores(@PathVariable("workspaceName") String workSpaceName) {
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public   ResponseEntity<?> getCoverageStores(@PathVariable("workspaceName") String workSpaceName) {
 
         return manageService.getCoverageStores(workSpaceName);
 
     }
-    @PostMapping("/workspaces/{workspaceName}/coveragestores2")
-    public void postCoverageStore1(@PathVariable("workspaceName")String workspaceName,@RequestBody PostCoverageStoreRequest request ) {
-        manageService.postCoverageStore2(workspaceName,request.getLayerName(),request.getFileUrl());
+
+     */
+    @PostMapping("/workspaces/{workspaceName}/coveragestores")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<?> postCoverageStore(@PathVariable("workspaceName")String workspaceName,@RequestBody PostCoverageStoreRequest request ) {
+        manageService.postCoverageStore(workspaceName,request.getLayerName(),request.getFileUrl());
+        return ResponseEntity.ok().build();
 
     }
 
