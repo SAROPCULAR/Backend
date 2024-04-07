@@ -1,10 +1,13 @@
 package com.sarop.saropbackend.restapi.entity;
 
+import com.sarop.saropbackend.note.entity.Note;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -26,7 +29,8 @@ public class Map {
 
     @ManyToOne
     private Workspace workspace;
-
+    @OneToMany
+    private List<Note> noteList;
 
 
 }
