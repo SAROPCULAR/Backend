@@ -2,6 +2,7 @@ package com.sarop.saropbackend.user.service.impl;
 
 import com.sarop.saropbackend.user.dto.ChangePasswordRequest;
 import com.sarop.saropbackend.user.model.User;
+import com.sarop.saropbackend.user.model.UserStatus;
 import com.sarop.saropbackend.user.repository.UserRepository;
 import com.sarop.saropbackend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,14 +39,9 @@ public class UserServiceImpl implements UserService {
         repository.save(user);
     }
 
-    public List<User> findAllUser(Optional<String> email, Optional<String> id){
-        List<User> users = repository.findAll().stream()
-                .filter(user ->
-                                (!email.isPresent()|| user.getEmail().equals(email)) ||
-                                (!id.isPresent() || user.getId().equals(id))
-                )
-                .collect(Collectors.toList());
-        return users;
+    public List<User> findAllUser(){
+
+        return repository.findAllByStatus(UserStatus.VERIFIED);
     }
 
 }

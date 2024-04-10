@@ -31,6 +31,10 @@ public class User  {
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
 
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
+
+    private UserStatus status;
 
 
 }

@@ -18,7 +18,7 @@ public class ManageController {
 
 
     @GetMapping("/workspaces")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
     public ResponseEntity<?> getWorkspaces() {
 
         return ResponseEntity.ok(manageService.getWorkSpaces());
@@ -51,23 +51,7 @@ public class ManageController {
         manageService.deleteLayer(workSpaceName,layerName);
         return ResponseEntity.ok().build();
     }
-    /*
-    @GetMapping("/workspaces/{workspaceName}/coveragestores/{store}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public   ResponseEntity<?> getCoverageStore(@PathVariable("workspaceName") String workSpaceName, @PathVariable("store") String store) {
 
-        return ResponseEntity.ok(manageService.getCoverageStore(workSpaceName,store));
-    }
-
-    @GetMapping("/workspaces/{workspaceName}/coveragestores")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public   ResponseEntity<?> getCoverageStores(@PathVariable("workspaceName") String workSpaceName) {
-
-        return manageService.getCoverageStores(workSpaceName);
-
-    }
-
-     */
     @PostMapping("/workspaces/{workspaceName}/coveragestores")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<?> postCoverageStore(@PathVariable("workspaceName")String workspaceName,@RequestBody PostCoverageStoreRequest request ) {

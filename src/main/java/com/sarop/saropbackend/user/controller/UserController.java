@@ -8,12 +8,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+@PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
 public class UserController {
 
     private final UserService service;
@@ -28,9 +27,8 @@ public class UserController {
     }
 
     @GetMapping("/findAll")
-    public ResponseEntity<?> findAllUsers(@RequestParam(required = false) Optional<String> email,
-                                           @RequestParam(required = false) Optional<String> id){
-        return ResponseEntity.ok(service.findAllUser(email,id));
+    public ResponseEntity<?> findAllUsers(){
+        return ResponseEntity.ok(service.findAllUser());
     }
 
 

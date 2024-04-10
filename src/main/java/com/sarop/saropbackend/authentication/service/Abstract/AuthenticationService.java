@@ -16,4 +16,8 @@ public interface AuthenticationService {
              HttpServletRequest request,
              HttpServletResponse response
      ) throws IOException;
+
+     //AuthenticationResponse authenticateWithGoogle(OAuth2User principal);
+
+
 }
