@@ -31,4 +31,6 @@ public class UserSaveRequest {
     @NotNull
 
     private Role role;
+
+    private String teamName;
 }

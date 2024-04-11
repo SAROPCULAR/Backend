@@ -1,6 +1,7 @@
 package com.sarop.saropbackend.user.model;
 
 
+import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.token.model.Token;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,7 +35,13 @@ public class User  {
     @Enumerated(EnumType.STRING)
     private AuthProvider provider;
 
+    @Column
     private UserStatus status;
+
+    @ManyToOne
+    private Team team;
+
+
 
 
 }

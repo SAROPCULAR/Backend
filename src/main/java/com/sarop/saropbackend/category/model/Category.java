@@ -1,4 +1,4 @@
-package com.sarop.saropbackend.restapi.entity;
+package com.sarop.saropbackend.category.model;
 
 import com.sarop.saropbackend.operation.model.Operation;
 import jakarta.persistence.*;
@@ -14,23 +14,17 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name="map")
-public class Map {
+@Table(name = "category")
+public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(nullable=false)
-    private String mapName;
-    @Column(nullable=false)
-    private String mapType;
-    @Column(nullable=false)
-    private String fileUrl;
 
-    @ManyToOne
-    private Workspace workspace;
+    @Column
+    private String name;
 
-    @ManyToMany
-    private List<Operation> operation;
+    @OneToMany
 
-
+    private List<Operation> operations;
 }
