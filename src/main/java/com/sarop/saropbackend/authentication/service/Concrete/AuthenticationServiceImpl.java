@@ -8,16 +8,20 @@ import com.sarop.saropbackend.authentication.dto.LoginRequest;
 import com.sarop.saropbackend.authentication.dto.RegisterRequest;
 import com.sarop.saropbackend.authentication.service.Abstract.AuthenticationService;
 import com.sarop.saropbackend.config.JWTService;
+import com.sarop.saropbackend.exception.UserNotFoundException;
 import com.sarop.saropbackend.user.model.Role;
 import com.sarop.saropbackend.user.model.User;
+import com.sarop.saropbackend.user.model.UserStatus;
 import com.sarop.saropbackend.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -36,13 +40,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JWTService jwtService;
 
 
+
+
     public AuthenticationResponse register(RegisterRequest request) {
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER).build();
+                .role(Role.USER).status(UserStatus.NOT_VERIFIED).build();
         var savedUser = userRepository.save(user);
         var jwtToken = jwtService.generateToken(savedUser);
         var refreshToken = jwtService.generateRefreshToken(user);
@@ -57,15 +63,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public AuthenticationResponse login(LoginRequest request) {
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
+                .orElseThrow(()-> new UserNotFoundException());
+        if(user.getStatus() == UserStatus.VERIFIED){
+            var jwtToken = jwtService.generateToken(user);
+            var refreshToken = jwtService.generateRefreshToken(user);
 
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-
-        return AuthenticationResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+            return AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build();
+        }else{
+            throw new Error("User is not verified");
+        }
     }
 
 
@@ -86,7 +95,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
             var user = this.userRepository.findByEmail(userEmail)
-                    .orElseThrow();
+                    .orElseThrow(()-> new UserNotFoundException());
             if (jwtService.isTokenValid(refreshToken, userEmail)) {
                 var accessToken = jwtService.generateToken(user);
              //   revokeAllUserTokens(user);
@@ -99,8 +108,44 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             }
         }
     }
+    /*
+    @Override
+    public AuthenticationResponse authenticateWithGoogle(OAuth2User principal) {
 
+            String email = principal.getAttribute("email");
+            User user = userRepository.findByEmail(email).orElseThrow();
+            if(user == null){
+               return registerWithGoogle(email,principal);
+            }else{
+                return loginWithGoogle(user);
+            }
 
+    }
 
+    private AuthenticationResponse registerWithGoogle(String email,OAuth2User user){
+        User newUser = User.builder()
+                .email(email)
+                .firstName(user.getName())
+                .role(Role.USER)
+                .build();
+
+        var savedUser = userRepository.save(newUser);
+        var jwtToken = jwtService.generateToken(savedUser);
+        var refreshToken = jwtService.generateRefreshToken(savedUser);
+        return AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    private AuthenticationResponse loginWithGoogle(User user){
+        var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+        return AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+    */
 
 }

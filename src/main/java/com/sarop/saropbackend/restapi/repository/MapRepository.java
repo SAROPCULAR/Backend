@@ -11,5 +11,7 @@ public interface MapRepository extends JpaRepository<Map,String> {
 
     List<Map> findAllByWorkspaceName(String workspaceName);
 
+    Map findMapByMapName(String mapName);
+
     void deleteByMapName(String name);
 }

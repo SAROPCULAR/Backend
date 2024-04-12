@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface UserService {
     void changePassword(ChangePasswordRequest request, Principal connectedUser);
 
-     List<User> findAllUser(Optional<String> email, Optional<String> id);
+     List<User> findAllUser(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName);
 
 
 

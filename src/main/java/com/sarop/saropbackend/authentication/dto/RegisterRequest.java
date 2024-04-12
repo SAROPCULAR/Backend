@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
-    private String id;
+
     @NotEmpty
     private String firstName;
     @NotEmpty

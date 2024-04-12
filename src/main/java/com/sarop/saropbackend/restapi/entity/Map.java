@@ -1,10 +1,13 @@
 package com.sarop.saropbackend.restapi.entity;
 
+import com.sarop.saropbackend.operation.model.Operation;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -14,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name="map")
 public class Map {
     @Id
-    @Column()
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     @Column(nullable=false)
@@ -27,6 +29,8 @@ public class Map {
     @ManyToOne
     private Workspace workspace;
 
+    @ManyToMany
+    private List<Operation> operation;
 
 
 }

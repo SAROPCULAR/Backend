@@ -13,7 +13,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+@PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
 public class UserController {
 
     private final UserService service;
@@ -29,8 +29,10 @@ public class UserController {
 
     @GetMapping("/findAll")
     public ResponseEntity<?> findAllUsers(@RequestParam(required = false) Optional<String> email,
-                                           @RequestParam(required = false) Optional<String> id){
-        return ResponseEntity.ok(service.findAllUser(email,id));
+                                          @RequestParam(required = false) Optional<String> id,
+                                          @RequestParam(required = false) Optional<String> name,
+                                          @RequestParam(required = false) Optional<String> teamName){
+        return ResponseEntity.ok(service.findAllUser(email,id,name,teamName));
     }
 
 

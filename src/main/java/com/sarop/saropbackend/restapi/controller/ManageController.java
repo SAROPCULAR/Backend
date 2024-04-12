@@ -9,6 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.Optional;
+
+
 @RestController
 @RequestMapping("/manage")
 @RequiredArgsConstructor
@@ -18,10 +21,10 @@ public class ManageController {
 
 
     @GetMapping("/workspaces")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<?> getWorkspaces() {
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
+    public ResponseEntity<?> getWorkspaces(@RequestParam(required = false) Optional<String> workspaceName) {
 
-        return ResponseEntity.ok(manageService.getWorkSpaces());
+        return ResponseEntity.ok(manageService.getWorkSpaces(workspaceName));
     }
 
 
@@ -41,9 +44,11 @@ public class ManageController {
     }
     @GetMapping("/workspaces/{workspaceName}/layers")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<?> getLayer(@PathVariable("workspaceName") String workSpaceName) {
+    public ResponseEntity<?> getLayer(@PathVariable("workspaceName") String workSpaceName,
+                                      @RequestParam(required = false)Optional<String> mapName
+                                      ) {
 
-        return ResponseEntity.ok(manageService.getLayersByWorkspaces(workSpaceName));
+        return ResponseEntity.ok(manageService.getLayersByWorkspaces(workSpaceName,mapName));
     }
     @DeleteMapping("/workspaces/{workspaceName}/layers/{layerName}")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
@@ -51,23 +56,7 @@ public class ManageController {
         manageService.deleteLayer(workSpaceName,layerName);
         return ResponseEntity.ok().build();
     }
-    /*
-    @GetMapping("/workspaces/{workspaceName}/coveragestores/{store}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public   ResponseEntity<?> getCoverageStore(@PathVariable("workspaceName") String workSpaceName, @PathVariable("store") String store) {
 
-        return ResponseEntity.ok(manageService.getCoverageStore(workSpaceName,store));
-    }
-
-    @GetMapping("/workspaces/{workspaceName}/coveragestores")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public   ResponseEntity<?> getCoverageStores(@PathVariable("workspaceName") String workSpaceName) {
-
-        return manageService.getCoverageStores(workSpaceName);
-
-    }
-
-     */
     @PostMapping("/workspaces/{workspaceName}/coveragestores")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<?> postCoverageStore(@PathVariable("workspaceName")String workspaceName,@RequestBody PostCoverageStoreRequest request ) {
