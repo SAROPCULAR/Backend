@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -52,9 +54,11 @@ public class ManageServiceImpl implements ManageService {
         headers.setBasicAuth(this.username, this.password);
     }
 
-    public List<Workspace> getWorkSpaces() {
-
-        return workspaceRepository.findAll();
+    public List<Workspace> getWorkSpaces(Optional<String> workspaceName) {
+        List<Workspace> workspaces = workspaceRepository.findAll().stream().filter(workspace ->
+                        (!workspaceName.isPresent() || workspace.getName().equals(workspace))
+                ).collect(Collectors.toList());
+        return workspaces;
     }
 
     public void postWorkspace(String workspaceName) {
@@ -90,9 +94,11 @@ public class ManageServiceImpl implements ManageService {
         workspaceRepository.deleteByName(workSpaceName);
     }
 
-    public List<Map> getLayersByWorkspaces(String workSpaceName) {
-
-        return mapRepository.findAllByWorkspaceName(workSpaceName);
+    public List<Map> getLayersByWorkspaces(String workSpaceName, Optional<String> mapName) {
+        List<Map> maps = mapRepository.findAllByWorkspaceName(workSpaceName).stream().filter(map ->
+                        (!mapName.isPresent() || map.getMapName().equals(mapName))
+                ).collect(Collectors.toList());
+        return maps;
 
     }
 

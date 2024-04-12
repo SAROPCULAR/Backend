@@ -9,6 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.Optional;
+
+
 @RestController
 @RequestMapping("/manage")
 @RequiredArgsConstructor
@@ -19,9 +22,9 @@ public class ManageController {
 
     @GetMapping("/workspaces")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
-    public ResponseEntity<?> getWorkspaces() {
+    public ResponseEntity<?> getWorkspaces(@RequestParam(required = false) Optional<String> workspaceName) {
 
-        return ResponseEntity.ok(manageService.getWorkSpaces());
+        return ResponseEntity.ok(manageService.getWorkSpaces(workspaceName));
     }
 
 
@@ -41,9 +44,11 @@ public class ManageController {
     }
     @GetMapping("/workspaces/{workspaceName}/layers")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    public ResponseEntity<?> getLayer(@PathVariable("workspaceName") String workSpaceName) {
+    public ResponseEntity<?> getLayer(@PathVariable("workspaceName") String workSpaceName,
+                                      @RequestParam(required = false)Optional<String> mapName
+                                      ) {
 
-        return ResponseEntity.ok(manageService.getLayersByWorkspaces(workSpaceName));
+        return ResponseEntity.ok(manageService.getLayersByWorkspaces(workSpaceName,mapName));
     }
     @DeleteMapping("/workspaces/{workspaceName}/layers/{layerName}")
     @PreAuthorize("hasAnyAuthority('ADMIN')")

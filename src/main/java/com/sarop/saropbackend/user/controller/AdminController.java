@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @PreAuthorize("hasAnyAuthority('ADMIN')")
 @RequestMapping("/admin")
@@ -23,8 +25,11 @@ public class AdminController {
     }
 
     @GetMapping("/findAllNonVerified")
-    public ResponseEntity<?> findAllNonVerified(){
-        return ResponseEntity.ok(adminService.findAllNotVerifiedUsers());
+    public ResponseEntity<?> findAllNonVerified(@RequestParam(required = false) Optional<String> email,
+                                                @RequestParam(required = false) Optional<String> id,
+                                                @RequestParam(required = false) Optional<String> name,
+                                                @RequestParam(required = false) Optional<String> teamName){
+        return ResponseEntity.ok(adminService.findAllNotVerifiedUsers(email, id, name, teamName));
     }
 
     @PutMapping("/user/{id}")

@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/team")
 @RequiredArgsConstructor
@@ -22,8 +24,15 @@ public class TeamController {
 
     @GetMapping("/findAll")
     @PreAuthorize("hasAnyAuthority('ADMIN','OPERATION_ADMIN','USER')")
-    public ResponseEntity<?> getTeams(){
-        return ResponseEntity.ok(teamService.findAllTeams());
+    public ResponseEntity<?> getTeams(
+            @RequestParam(required = false) Optional<String> name,
+            @RequestParam(required = false) Optional<Integer> foundationYear,
+            @RequestParam(required = false) Optional<String> provinceName,
+            @RequestParam(required = false) Optional<String> provinceCode,
+            @RequestParam(required = false) Optional<String> teamLeaderName
+            )
+    {
+        return ResponseEntity.ok(teamService.findAllTeams(name, foundationYear, provinceName, provinceCode, teamLeaderName));
     }
 
     @PutMapping("/{id}")

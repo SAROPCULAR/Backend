@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/operation")
 @RequiredArgsConstructor
@@ -17,8 +19,14 @@ public class OperationController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
-    public ResponseEntity<?> getAllOperations(){
-        return ResponseEntity.ok(operationService.getAllOperations());
+    public ResponseEntity<?> getAllOperations(
+            @RequestParam(required = false) Optional<Integer> operationNumber,
+            @RequestParam(required = false) Optional<String> operationDate,
+            @RequestParam(required = false) Optional<String> name,
+            @RequestParam(required = false) Optional<String> categoryName,
+            @RequestParam(required = false) Optional<String> teamName
+    ){
+        return ResponseEntity.ok(operationService.getAllOperations(operationNumber, operationDate, name, categoryName, teamName));
     }
 
     @PostMapping

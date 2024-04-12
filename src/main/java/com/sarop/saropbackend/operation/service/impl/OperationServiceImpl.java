@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,8 +66,17 @@ public class OperationServiceImpl implements OperationService {
     }
 
     @Override
-    public List<Operation> getAllOperations() {
-        return operationRepository.findAll();
+    public List<Operation> getAllOperations(Optional<Integer> operationNumber,Optional<String> operationDate,
+                                            Optional<String> name,Optional<String> categoryName,Optional<String> teamName
+                                            ) {
+        List<Operation> operations = operationRepository.findAll().stream().filter(operation ->
+                        (!operationNumber.isPresent() || operationNumber.equals(operation.getOperationNumber())) ||
+                                (!operationDate.isPresent() || operation.getOperationDate().equals(operationDate)) ||
+                                (!name.isPresent() || operation.getName().equals(name)) ||
+                                (!categoryName.isPresent() || operation.getCategory().getName().equals(categoryName))
+                || (!teamName.isPresent() || operation.getTeam().getName().equals(teamName))
+                ).collect(Collectors.toList());
+        return operations;
     }
 
     @Override

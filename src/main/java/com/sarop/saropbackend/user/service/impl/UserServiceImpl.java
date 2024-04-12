@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,9 +41,17 @@ public class UserServiceImpl implements UserService {
         repository.save(user);
     }
 
-    public List<User> findAllUser(){
-
-        return repository.findAllByStatus(UserStatus.VERIFIED);
+    public List<User> findAllUser(Optional<String> email, Optional<String> id,Optional<String> name,Optional<String> teamName){
+        List<User> users = repository.findAll().stream()
+                .filter(user ->
+                        ((!email.isPresent()|| user.getEmail().equals(email)) ||
+                                (!id.isPresent() || user.getId().equals(id)) ||
+                                (!name.isPresent() || (user.getFirstName() + " " + user.getLastName()).equals(name))
+                                || (!teamName.isPresent() || (user.getTeam().getName()).equals(teamName)))
+                                && (user.getStatus() == UserStatus.VERIFIED)
+                )
+                .collect(Collectors.toList());
+        return users;
     }
 
 }

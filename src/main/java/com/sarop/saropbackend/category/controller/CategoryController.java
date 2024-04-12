@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/category")
@@ -17,8 +19,8 @@ public class CategoryController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
-    public ResponseEntity<?> getAllCategories(){
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public ResponseEntity<?> getAllCategories(@RequestParam(required = false) Optional<String> name){
+        return ResponseEntity.ok(categoryService.getAllCategories(name));
     }
 
     @PostMapping

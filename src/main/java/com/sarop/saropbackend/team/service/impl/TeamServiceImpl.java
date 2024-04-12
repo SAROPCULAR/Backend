@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -82,8 +84,17 @@ public class TeamServiceImpl implements TeamService {
 
 
     @Override
-    public List<Team> findAllTeams() {
-        return teamRepository.findAll();
+    public List<Team> findAllTeams(Optional<String> name, Optional<Integer> foundationYear, Optional<String> provinceName,
+                                   Optional<String> provinceCode, Optional<String> teamLeaderName
+                                   ) {
+        List<Team> teams = teamRepository.findAll().stream().filter(team ->
+                        (!name.isPresent() || team.getName().equals(name)) ||
+                                (!foundationYear.isPresent() || foundationYear.equals(team.getFoundationYear())) ||
+                                (!provinceName.isPresent() || team.getProvinceName().equals(provinceName)) ||
+                                (!provinceCode.isPresent() || team.getProvinceCode().equals(provinceCode)) ||
+                                (!teamLeaderName.isPresent() || (team.getTeamLeader().getFirstName() + " " + team.getTeamLeader().getLastName()).equals(teamLeaderName))
+                ).collect(Collectors.toList());
+        return teams;
     }
 
     @Override

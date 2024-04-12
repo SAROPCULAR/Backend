@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -71,8 +73,17 @@ public class AdminServiceImpl implements AdminService {
         userRepository.save(user);
     }
 
-    public List<User> findAllNotVerifiedUsers(){
-        return userRepository.findAllByStatus(UserStatus.NOT_VERIFIED);
+    public List<User> findAllNotVerifiedUsers(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName){
+        List<User> users = userRepository.findAll().stream()
+                .filter(user ->
+                        ((!email.isPresent()|| user.getEmail().equals(email)) ||
+                                (!id.isPresent() || user.getId().equals(id)) ||
+                                (!name.isPresent() || (user.getFirstName() + " " + user.getLastName()).equals(name))
+                                || (!teamName.isPresent() || (user.getTeam().getName()).equals(teamName)))
+                                && (user.getStatus() == UserStatus.NOT_VERIFIED)
+                )
+                .collect(Collectors.toList());
+        return users;
     }
 
 }

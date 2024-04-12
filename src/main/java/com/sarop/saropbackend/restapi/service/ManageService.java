@@ -4,12 +4,13 @@ import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.entity.Workspace;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ManageService {
-    List<Workspace> getWorkSpaces();
+    List<Workspace> getWorkSpaces(Optional<String> workspaceName);
     void postWorkspace(String workspaceName);
     void deleteWorkSpace(String workSpaceName);
-    List<Map> getLayersByWorkspaces(String workSpaceName);
+    List<Map> getLayersByWorkspaces(String workSpaceName, Optional<String> mapName);
 
     // TO DO: Update workspace, update layer, workspace'den map silmek ve başka workspace'e eklemek eklenecek
 

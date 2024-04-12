@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +33,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<Category> getAllCategories(Optional<String> name) {
+        List<Category> categories = categoryRepository.findAll().stream().filter(category ->
+                        (!name.isPresent() || category.getName().equals(name))
+                ).collect(Collectors.toList());
+        return categories;
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.sarop.saropbackend.user.dto.UserUpdateRequest;
 import com.sarop.saropbackend.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AdminService {
 
@@ -14,5 +15,5 @@ public interface AdminService {
     void deleteUser(String id);
 
     void verifyUser(String id);
-    List<User> findAllNotVerifiedUsers();
+    List<User> findAllNotVerifiedUsers(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName);
 }

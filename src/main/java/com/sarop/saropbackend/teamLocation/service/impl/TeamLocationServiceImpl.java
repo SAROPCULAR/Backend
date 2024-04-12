@@ -11,13 +11,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TeamLocationServiceImpl implements TeamLocationService {
 
     private final TeamLocationRepository teamLocationRepository;
-    private final TeamRepository teamRepository;
+
     @Override
     public TeamLocation addTeamLocation(TeamLocationSaveRequest teamLocationSaveRequest) {
         var teamLocation = TeamLocation.builder().id(Util.generateUUID()).name(teamLocationSaveRequest.getName())
@@ -53,8 +55,21 @@ public class TeamLocationServiceImpl implements TeamLocationService {
     }
 
     @Override
-    public List<TeamLocation> getAllTeamLocations() {
-        return teamLocationRepository.findAll();
+    public List<TeamLocation> getAllTeamLocations(Optional<String> teamName, Optional<String> name,
+                                                  Optional<String> provinceCode,Optional<String> provinceName,
+                                                  Optional<String> countyName
+                                                  ) {
+        List<TeamLocation> teamLocations = teamLocationRepository.findAll().stream()
+                .filter(teamLocation ->
+                        (!teamName.isPresent() || teamLocation.getTeam().getName().equals(teamName)) ||
+                                (!name.isPresent() || teamLocation.getName().equals(name)) ||
+                                (!provinceCode.isPresent() || teamLocation.getProvinceCode().equals(provinceCode)) ||
+                                (!provinceName.isPresent() || teamLocation.getProvinceName().equals(provinceName)) ||
+                                (!countyName.isPresent() || teamLocation.getCountyName().equals(countyName))
+                ).collect(Collectors.toList());
+
+
+        return teamLocations;
     }
 
     @Override
