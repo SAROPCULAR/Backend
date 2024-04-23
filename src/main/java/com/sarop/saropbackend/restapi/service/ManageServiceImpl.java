@@ -153,7 +153,7 @@ public class ManageServiceImpl implements ManageService {
                     "}";
             addCoverage(workspaceName,layerName,coverageJson);
             var workspace = workspaceRepository.findWorkspaceByName(workspaceName).orElseThrow();
-            Map map = Map.builder().id(Util.generateUUID()).mapName(layerName)
+            Map map = Map.builder().mapId(Util.generateUUID()).mapName(layerName)
                     .fileUrl(fileUrl).mapType(mapType).workspace(workspace).build();
             mapRepository.save(map);
         } catch (Exception e) {

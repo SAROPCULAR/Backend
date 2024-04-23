@@ -25,11 +25,12 @@ public class Note  {
     private String title;
     @Column(nullable=false)
     private String comment;
-
-    @Column(columnDefinition = "Geometry")
-    private Point point;
-
+    @Column(nullable=false)
+    private double x;
+    @Column(nullable=false)
+    private double y;
     @ManyToOne
+    @JoinColumn(name="mapId",nullable = false)
     private Map map;
 
 

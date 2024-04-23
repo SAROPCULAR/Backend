@@ -13,18 +13,16 @@ import java.util.Optional;
 @Service
 public class NoteServiceImpl implements NoteService{
     private final NoteRepository noteRepository;
-    private final MapRepository mapRepository;
+
 
     @Autowired
-    public NoteServiceImpl(NoteRepository noteRepository,MapRepository mapRepository) {
+    public NoteServiceImpl(NoteRepository noteRepository) {
         this.noteRepository = noteRepository;
-        this.mapRepository = mapRepository;
+
     }
 
     public Note createNoteWithMap(Note note, String mapId) {
-        Map map = mapRepository.findById(mapId)
-                .orElseThrow(() -> new IllegalArgumentException("Map not found with id: " + mapId));
-        note.setMap(map);
+
         return noteRepository.save(note);
     }
 
