@@ -9,6 +9,7 @@ import com.sarop.saropbackend.authentication.dto.RegisterRequest;
 import com.sarop.saropbackend.authentication.service.Abstract.AuthenticationService;
 import com.sarop.saropbackend.config.JWTService;
 import com.sarop.saropbackend.exception.UserNotFoundException;
+import com.sarop.saropbackend.exception.UserNotVerifiedException;
 import com.sarop.saropbackend.user.model.Role;
 import com.sarop.saropbackend.user.model.User;
 import com.sarop.saropbackend.user.model.UserStatus;
@@ -74,7 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .refreshToken(refreshToken)
                     .build();
         }else{
-            throw new Error("User is not verified");
+            throw new UserNotVerifiedException();
         }
     }
 

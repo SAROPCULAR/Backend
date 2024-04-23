@@ -27,7 +27,7 @@ public class Category {
     @Column
     private String name;
 
-    @OneToMany(mappedBy = "category",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "category",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 
     private List<Operation> operations;
 }

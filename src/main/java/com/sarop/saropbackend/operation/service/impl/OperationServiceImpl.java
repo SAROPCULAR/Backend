@@ -57,17 +57,22 @@ public class OperationServiceImpl implements OperationService {
                     operation.setOperationDate(operationApiModel.getOperationDate());
                     operation.setName(operationApiModel.getName());
                     operationRepository.save(operation);
-                    Category category = new Category();
-                    category.setId(Util.generateUUID());
-                    if(category.getOperations() == null){
-                        category.setOperations(new ArrayList<>());
+                    Category category = categoryRepository.findCategoryByName(operationApiModel.getCategoryName());
+                    if(category == null){
+                        category = new Category();
+                        category.setId(Util.generateUUID());
+                        if(category.getOperations() == null){
+                            category.setOperations(new ArrayList<>());
+                        }
+                        category.getOperations().add(operation);
+                        category.setName(operationApiModel.getCategoryName());
+                        operation.setCategory(category);
+                        categoryRepository.save(category);
+                    }else{
+                        category.getOperations().add(operation);
+                        operation.setCategory(category);
+                        categoryRepository.save(category);
                     }
-                    category.getOperations().add(operation);
-                    category.setName(operationApiModel.getCategoryName());
-                    operation.setCategory(category);
-                    categoryRepository.save(category);
-
-
                     operationRepository.save(operation);
                 }
             } else {
