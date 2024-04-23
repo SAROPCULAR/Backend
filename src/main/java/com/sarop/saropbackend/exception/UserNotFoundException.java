@@ -1,6 +1,6 @@
 package com.sarop.saropbackend.exception;
 
-public class UserNotFoundException extends NotFoundException{
+public class UserNotFoundException extends SaropException{
 
     public UserNotFoundException() {
         super("User does not found!");
