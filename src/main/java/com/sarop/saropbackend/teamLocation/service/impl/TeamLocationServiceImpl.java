@@ -2,13 +2,13 @@ package com.sarop.saropbackend.teamLocation.service.impl;
 
 
 import com.sarop.saropbackend.common.Util;
-import com.sarop.saropbackend.team.repository.TeamRepository;
 import com.sarop.saropbackend.teamLocation.dto.TeamLocationSaveRequest;
 import com.sarop.saropbackend.teamLocation.model.TeamLocation;
 import com.sarop.saropbackend.teamLocation.repository.TeamLocationRepository;
 import com.sarop.saropbackend.teamLocation.service.TeamLocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +21,7 @@ public class TeamLocationServiceImpl implements TeamLocationService {
     private final TeamLocationRepository teamLocationRepository;
 
     @Override
+    @Transactional
     public TeamLocation addTeamLocation(TeamLocationSaveRequest teamLocationSaveRequest) {
         var teamLocation = TeamLocation.builder().id(Util.generateUUID()).name(teamLocationSaveRequest.getName())
                 .provinceCode(teamLocationSaveRequest.getProvinceCode())

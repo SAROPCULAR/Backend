@@ -4,6 +4,8 @@ import com.sarop.saropbackend.category.model.Category;
 import com.sarop.saropbackend.category.repository.CategoryRepository;
 import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.operation.dto.OperationSaveRequest;
+import com.sarop.saropbackend.operation.dto.apimodels.OperationApiModel;
+import com.sarop.saropbackend.operation.dto.apiresponse.OperationListApiResponse;
 import com.sarop.saropbackend.operation.model.Operation;
 import com.sarop.saropbackend.operation.repository.OperationRepository;
 import com.sarop.saropbackend.operation.service.OperationService;
@@ -11,8 +13,12 @@ import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.repository.MapRepository;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.team.repository.TeamRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +35,48 @@ public class OperationServiceImpl implements OperationService {
     private final MapRepository mapRepository;
 
     private final CategoryRepository categoryRepository;
+
+    @PostConstruct
+    public void loadDataFromAPI() {
+
+        String apiUrl = "https://portal.akut.org.tr/api/webpage/getoperationlist";
+        // Make HTTP request to fetch data from API
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<OperationListApiResponse> responseEntity = restTemplate.getForEntity(apiUrl, OperationListApiResponse.class);
+
+
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            OperationListApiResponse response = responseEntity.getBody();
+
+            if (response != null && response.getOperationListApiModels() != null) {
+
+                for (OperationApiModel operationApiModel : response.getOperationListApiModels()) {
+                    Operation operation = new Operation();
+                    operation.setId(operationApiModel.getOperationId());
+                    operation.setOperationNumber(operationApiModel.getOperationNumber());
+                    operation.setOperationDate(operationApiModel.getOperationDate());
+                    operation.setName(operationApiModel.getName());
+                    operationRepository.save(operation);
+                    Category category = new Category();
+                    category.setId(Util.generateUUID());
+                    if(category.getOperations() == null){
+                        category.setOperations(new ArrayList<>());
+                    }
+                    category.getOperations().add(operation);
+                    category.setName(operationApiModel.getCategoryName());
+                    operation.setCategory(category);
+                    categoryRepository.save(category);
+
+
+                    operationRepository.save(operation);
+                }
+            } else {
+                System.out.println("Empty or null response from the API.");
+            }
+        } else {
+            System.out.println("Error fetching data from API. Status code: " + responseEntity.getStatusCodeValue());
+        }
+    }
     @Override
     public Operation addOperation(OperationSaveRequest operationSaveRequest) {
         Team team = teamRepository.findTeamByName(operationSaveRequest.getTeamName());

@@ -18,10 +18,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
-import java.util.Optional;
+
 
 @RequiredArgsConstructor
 @Service
@@ -42,10 +44,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
 
+    @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
+        var user = User.builder().name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER).status(UserStatus.NOT_VERIFIED).build();
@@ -60,7 +61,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
 
-
+    @Transactional
     public AuthenticationResponse login(LoginRequest request) {
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()-> new UserNotFoundException());

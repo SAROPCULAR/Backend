@@ -26,10 +26,10 @@ public class Map {
     @Column(nullable=false)
     private String fileUrl;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Workspace workspace;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<Operation> operation;
 
 

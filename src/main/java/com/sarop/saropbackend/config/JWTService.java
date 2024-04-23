@@ -42,8 +42,7 @@ public class JWTService {
 
 
         claim.put(TokenClaims.USER_ID.getValue(),user.getId());
-        claim.put(TokenClaims.FIRST_NAME.getValue(), user.getFirstName());
-        claim.put(TokenClaims.LAST_NAME.getValue(),user.getLastName());
+        claim.put(TokenClaims.NAME.getValue(), user.getName());
         claim.put(TokenClaims.MAIL.getValue(), user.getEmail());
         claim.put(TokenClaims.ROLE_NAME.getValue(),user.getRole().name());
 

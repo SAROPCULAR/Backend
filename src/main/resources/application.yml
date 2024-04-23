@@ -6,26 +6,14 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     show-sql: false
     properties:
       hibernate:
         format_sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    security:
-      oauth2:
-        client:
-          registration:
-            google:
-              client-id: 539866157176-utfp2sc5o8k0f89utp0lg6fdfg34tqsf.apps.googleusercontent.com
-              client-secret: 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
-              scope:
-                - email
-                - profile
-          provider:
-            google:
-              user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+
 
 application:
   security:

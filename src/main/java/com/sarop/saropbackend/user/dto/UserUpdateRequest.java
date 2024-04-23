@@ -11,10 +11,7 @@ import lombok.*;
 public class UserUpdateRequest {
 
     @NotBlank
-    private String firstName;
-
-    @NotBlank
-    private String lastName;
+    private String name;
 
     @Email
     @NotBlank
