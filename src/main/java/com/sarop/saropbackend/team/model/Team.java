@@ -1,5 +1,7 @@
 package com.sarop.saropbackend.team.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.sarop.saropbackend.teamLocation.model.TeamLocation;
 import com.sarop.saropbackend.user.model.User;
 import jakarta.persistence.*;
@@ -10,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,17 +37,17 @@ public class Team {
     @Column
     private String provinceName;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private User teamLeader;
 
 
     @Column
     private String phoneDescription;
 
-    @OneToMany(mappedBy = "team")
-
+    @OneToMany(mappedBy = "team",cascade = CascadeType.ALL)
     private List<TeamLocation> teamLocations;
 
-    @OneToMany
+
+    @OneToMany(mappedBy = "team",cascade = CascadeType.ALL)
     private List<User> members;
 }

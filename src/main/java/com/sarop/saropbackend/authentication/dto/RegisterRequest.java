@@ -11,9 +11,8 @@ import lombok.*;
 public class RegisterRequest {
 
     @NotEmpty
-    private String firstName;
-    @NotEmpty
-    private String lastName;
+    private String name;
+
     @NotEmpty(message = "Email should not be empty")
     @Email
     private String email;

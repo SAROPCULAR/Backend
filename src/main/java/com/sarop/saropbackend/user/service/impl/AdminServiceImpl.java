@@ -15,6 +15,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,26 +36,28 @@ public class AdminServiceImpl implements AdminService {
     @PostConstruct
     public void initializeAdminUser() {
         if(!userRepository.existsByRole(Role.ADMIN)){
-            var admin = User.builder().firstName("admin")
-                    .lastName("User").email("admin@example.com")
+            var admin = User.builder().name("admin")
+                    .email("admin@example.com")
                     .password(passwordEncoder.encode("admin"))
                     .role(Role.ADMIN).status(UserStatus.VERIFIED).build();
             userRepository.save(admin);
         }
     }
+
+    @Transactional
     public User saveUser(UserSaveRequest userSaveRequest) {
         Team team = teamRepository.findTeamByName(userSaveRequest.getTeamName());
-        var user = User.builder().firstName(userSaveRequest.getFirstName()).lastName(userSaveRequest.getLastName()).
+        var user = User.builder().name(userSaveRequest.getName()).
                 email(userSaveRequest.getEmail()).
                 password(passwordEncoder.encode(userSaveRequest.getPassword())).
                 role(userSaveRequest.getRole()).status(UserStatus.VERIFIED).team(team).build();
         return userRepository.save(user);
     }
 
+    @Transactional
     public User updateUser(String id, UserUpdateRequest userUpdateRequest) {
         User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException());
-        user.setFirstName(userUpdateRequest.getFirstName());
-        user.setLastName(userUpdateRequest.getLastName());
+        user.setName(userUpdateRequest.getName());
         user.setEmail(userUpdateRequest.getEmail());
         user.setPassword(passwordEncoder.encode(userUpdateRequest.getPassword()));
         Team team = teamRepository.findTeamByName(userUpdateRequest.getTeamName());
@@ -62,11 +65,13 @@ public class AdminServiceImpl implements AdminService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public void deleteUser(String id) {
         User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException());
         userRepository.delete(user);
     }
 
+    @Transactional
     public void verifyUser(String id){
         User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException());
         user.setStatus(UserStatus.VERIFIED);
@@ -78,7 +83,7 @@ public class AdminServiceImpl implements AdminService {
                 .filter(user ->
                         ((!email.isPresent()|| user.getEmail().equals(email)) ||
                                 (!id.isPresent() || user.getId().equals(id)) ||
-                                (!name.isPresent() || (user.getFirstName() + " " + user.getLastName()).equals(name))
+                                (!name.isPresent() || (user.getName()).equals(name))
                                 || (!teamName.isPresent() || (user.getTeam().getName()).equals(teamName)))
                                 && (user.getStatus() == UserStatus.NOT_VERIFIED)
                 )

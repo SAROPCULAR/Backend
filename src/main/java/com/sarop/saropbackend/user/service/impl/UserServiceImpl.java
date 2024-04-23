@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
                 .filter(user ->
                         ((!email.isPresent()|| user.getEmail().equals(email)) ||
                                 (!id.isPresent() || user.getId().equals(id)) ||
-                                (!name.isPresent() || (user.getFirstName() + " " + user.getLastName()).equals(name))
+                                (!name.isPresent() || (user.getName()).equals(name))
                                 || (!teamName.isPresent() || (user.getTeam().getName()).equals(teamName)))
                                 && (user.getStatus() == UserStatus.VERIFIED)
                 )

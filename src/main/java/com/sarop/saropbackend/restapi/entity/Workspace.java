@@ -24,6 +24,6 @@ public class Workspace {
     @Column
     private String name;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Map> maps;
 }

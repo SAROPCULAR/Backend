@@ -1,5 +1,7 @@
 package com.sarop.saropbackend.teamLocation.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.sarop.saropbackend.team.model.Team;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,11 +23,11 @@ public class TeamLocation {
     private String id;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "team_id")
     private Team team;
 
-    @Column
+    @Column(length = 500)
     private String name;
 
     @Column
@@ -36,7 +39,7 @@ public class TeamLocation {
     @Column
     private String countyName;
 
-    @Column
+    @Column(length = 500)
     private String address;
 
     @Column
@@ -45,7 +48,7 @@ public class TeamLocation {
     @Column
     private double longitude;
 
-    @Column
+    @Column(length = 500)
     private String description;
 
     @Column

@@ -1,6 +1,7 @@
 package com.sarop.saropbackend.user.model;
 
 
+import com.fasterxml.jackson.annotation.*;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.token.model.Token;
 import jakarta.persistence.*;
@@ -8,6 +9,7 @@ import lombok.*;
 
 import java.util.List;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,26 +21,22 @@ public class User  {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(nullable=false)
-    private String firstName;
-    @Column(nullable=false)
-    private String lastName;
+    @Column(nullable = false)
+    private String name;
     @Column(nullable=false, unique=true)
     private String email;
     @Column(nullable=false)
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Token> tokens;
-
-    @Enumerated(EnumType.STRING)
-    private AuthProvider provider;
 
     @Column
     private UserStatus status;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "team_id")
     private Team team;
 
 

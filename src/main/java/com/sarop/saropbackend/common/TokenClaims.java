@@ -9,9 +9,8 @@ public enum TokenClaims {
     JWT_ID("jti"),
     TYPE("typ"),
     USER_ID("userId"),
-    FIRST_NAME("firstName"),
+    NAME("name"),
 
-    LAST_NAME("lastName"),
 
     MAIL("mail"),
     USER_STATUS("userStatus"),

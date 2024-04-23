@@ -1,5 +1,7 @@
 package com.sarop.saropbackend.operation.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.sarop.saropbackend.category.model.Category;
 import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.team.model.Team;
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,13 +35,15 @@ public class Operation {
     @Column
     private String name;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="team_id")
     private Team team;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "operation_map",
             joinColumns = @JoinColumn(name = "operation_id"),
