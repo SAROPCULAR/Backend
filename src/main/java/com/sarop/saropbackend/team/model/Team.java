@@ -44,10 +44,10 @@ public class Team {
     @Column
     private String phoneDescription;
 
-    @OneToMany(mappedBy = "team",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<TeamLocation> teamLocations;
 
 
-    @OneToMany(mappedBy = "team",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<User> members;
 }

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
 
@@ -19,8 +20,8 @@ public class CategoryController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
-    public ResponseEntity<?> getAllCategories(@RequestParam(required = false) Optional<String> name){
-        return ResponseEntity.ok(categoryService.getAllCategories(name));
+    public ResponseEntity<?> getAllCategories(){
+        return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
     @PostMapping

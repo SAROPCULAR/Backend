@@ -8,6 +8,8 @@ import com.sarop.saropbackend.operation.model.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,12 +35,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<Category> getAllCategories(Optional<String> name) {
-        List<Category> categories = categoryRepository.findAll().stream().filter(category ->
-                        (!name.isPresent() || category.getName().equals(name))
-                ).collect(Collectors.toList());
-        return categories;
+    public List<Category> getAllCategories(){
+        return categoryRepository.findAll();
     }
+
 
     @Override
     public void deleteCategory(String id) {

@@ -42,6 +42,7 @@ public class TeamServiceImpl implements TeamService {
 
     private final PasswordEncoder passwordEncoder;
 
+    /*
     @PostConstruct
     //@Transactional
     public void loadDataFromApi() {
@@ -100,79 +101,127 @@ public class TeamServiceImpl implements TeamService {
             }
         }
     }
+    */
+
     @Override
     @Transactional
     public Team addTeam(TeamSaveRequest teamSaveRequest) {
-        var team = Team.builder().id(Util.generateUUID()).name(teamSaveRequest.getName())
+        // Create team entity
+        var team = Team.builder()
+                .id(Util.generateUUID())
+                .name(teamSaveRequest.getName())
                 .foundationYear(teamSaveRequest.getFoundationYear())
                 .provinceCode(teamSaveRequest.getProvinceCode())
                 .provinceName(teamSaveRequest.getProvinceName())
                 .phoneDescription(teamSaveRequest.getPhoneDescription())
-                .teamLocations(new ArrayList<TeamLocation>())
-                .members(new ArrayList<User>()).build();
+                .teamLocations(new ArrayList<>())
+                .members(new ArrayList<>())
+                .build();
+
+        // Save the team
+        team = teamRepository.save(team);
+
+        // Find team leader and set role
         User teamLeader = userRepository.findByEmail(teamSaveRequest.getTeamLeaderEmail()).orElseThrow();
         teamLeader.setRole(Role.OPERATION_ADMIN);
-        team.setTeamLeader(teamLeader);
 
-        for(String name : teamSaveRequest.getTeamLocations()){
-            TeamLocation teamLocation = teamLocationRepository.findTeamLocationByName(name);
-            team.getTeamLocations().add(teamLocation);
-        }
-        for(String email: teamSaveRequest.getUsers()){
+        // Create a list to store members
+        List<User> membersToSave = new ArrayList<>();
+
+        // Add users to the team
+        for (String email : teamSaveRequest.getUsers()) {
             User user = userRepository.findByEmail(email).orElseThrow();
             team.getMembers().add(user);
+            user.setTeam(team);
+            membersToSave.add(user);
         }
-        teamRepository.save(team);
+
+        // Save the team members
+        userRepository.saveAll(membersToSave);
+
+        // Add team locations
+        for (String name : teamSaveRequest.getTeamLocations()) {
+            TeamLocation teamLocation = teamLocationRepository.findTeamLocationByName(name);
+            teamLocation.setTeam(team);
+            team.getTeamLocations().add(teamLocation);
+        }
+
+        // Save the team locations
+        teamLocationRepository.saveAll(team.getTeamLocations());
+
+        // Set team leader
+        team.setTeamLeader(teamLeader);
+        teamLeader.setTeam(team);
+        userRepository.save(teamLeader);
 
         return team;
     }
 
+
+
+
     @Override
     @Transactional
-    public Team updateTeam(String id,TeamSaveRequest teamUpdateRequest) {
+    public Team updateTeam(String id, TeamSaveRequest teamUpdateRequest) {
         Team team = teamRepository.findById(id).orElseThrow();
         team.setName(teamUpdateRequest.getName());
         team.setFoundationYear(teamUpdateRequest.getFoundationYear());
         team.setProvinceCode(teamUpdateRequest.getProvinceCode());
         team.setProvinceName(teamUpdateRequest.getProvinceName());
         team.setPhoneDescription(teamUpdateRequest.getPhoneDescription());
+
         User teamLeader = userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).orElseThrow();
-        if(teamLeader.equals(team.getTeamLeader())){
+        if (!teamLeader.equals(team.getTeamLeader())) {
             team.getTeamLeader().setRole(Role.USER);
             teamLeader.setRole(Role.OPERATION_ADMIN);
             team.setTeamLeader(teamLeader);
         }
-        List<TeamLocation> teamLocations = new ArrayList<TeamLocation>();
-        List<User> members = new ArrayList<User>();
-        for(String name : teamUpdateRequest.getTeamLocations()){
+
+        // Update team locations
+        for(TeamLocation teamLocation: team.getTeamLocations()){
+            teamLocation.setTeam(null);
+        }
+        team.getTeamLocations().clear();
+        for (String name : teamUpdateRequest.getTeamLocations()) {
             TeamLocation teamLocation = teamLocationRepository.findTeamLocationByName(name);
-            teamLocations.add(teamLocation);
+            team.getTeamLocations().add(teamLocation);
+            teamLocation.setTeam(team);
         }
-        for(String email: teamUpdateRequest.getUsers()){
+
+        // Update team members
+        for(User user: team.getMembers()){
+            user.setTeam(null);
+        }
+        team.getMembers().clear();
+        for (String email : teamUpdateRequest.getUsers()) {
             User user = userRepository.findByEmail(email).orElseThrow();
-            members.add(user);
+            team.getMembers().add(user);
+            user.setTeam(team);
         }
-        team.setTeamLocations(teamLocations);
-        team.setMembers(members);
-        teamRepository.save(team);
+
+        // Save the updated team with all its relationships
+        team = teamRepository.save(team);
+
         return team;
     }
 
 
+
     @Override
     public List<Team> findAllTeams(Optional<String> name, Optional<Integer> foundationYear, Optional<String> provinceName,
-                                   Optional<String> provinceCode, Optional<String> teamLeaderName
-                                   ) {
+                                   Optional<String> provinceCode, Optional<String> teamLeaderName) {
 
         List<Team> teams = teamRepository.findAll().stream().filter(team ->
-                        (!name.isPresent() || team.getName().equals(name)) ||
-                                (!foundationYear.isPresent() || foundationYear.equals(team.getFoundationYear())) ||
-                                (!provinceName.isPresent() || team.getProvinceName().equals(provinceName)) ||
-                                (!provinceCode.isPresent() || team.getProvinceCode().equals(provinceCode)) ||
-                                (!teamLeaderName.isPresent() || (team.getTeamLeader().getName()).equals(teamLeaderName))
-                ).collect(Collectors.toList());
+                (name.isEmpty() || team.getName().equals(name.get())) &&
+                        (foundationYear.isEmpty() || foundationYear.get().equals(team.getFoundationYear())) &&
+                        (provinceName.isEmpty() || team.getProvinceName().equals(provinceName.get())) &&
+                        (provinceCode.isEmpty() || team.getProvinceCode().equals(provinceCode.get())) &&
+                        (teamLeaderName.isEmpty() || team.getTeamLeader().getName().equals(teamLeaderName.get()))
+        ).collect(Collectors.toList());
+
         return teams;
     }
+
 
     @Override
     public void deleteTeam(String id) {

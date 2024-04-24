@@ -17,7 +17,7 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService service;
-
+    /*
     @PatchMapping("/change-password")
     public ResponseEntity<?> changePassword(
             @RequestBody ChangePasswordRequest request,
@@ -26,6 +26,8 @@ public class UserController {
         service.changePassword(request, connectedUser);
         return ResponseEntity.ok().build();
     }
+
+     */
 
     @GetMapping("/findAll")
     public ResponseEntity<?> findAllUsers(@RequestParam(required = false) Optional<String> email,

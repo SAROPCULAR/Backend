@@ -55,9 +55,11 @@ public class ManageServiceImpl implements ManageService {
     }
 
     public List<Workspace> getWorkSpaces(Optional<String> workspaceName) {
-        List<Workspace> workspaces = workspaceRepository.findAll().stream().filter(workspace ->
-                        (!workspaceName.isPresent() || workspace.getName().equals(workspace))
-                ).collect(Collectors.toList());
+        List<Workspace> workspaces = workspaceRepository.findAll().stream()
+                .filter(workspace ->
+                        (workspaceName.isEmpty() || workspace.getName().equals(workspaceName.get()))
+                )
+                .collect(Collectors.toList());
         return workspaces;
     }
 
@@ -95,12 +97,14 @@ public class ManageServiceImpl implements ManageService {
     }
 
     public List<Map> getLayersByWorkspaces(String workSpaceName, Optional<String> mapName) {
-        List<Map> maps = mapRepository.findAllByWorkspaceName(workSpaceName).stream().filter(map ->
-                        (!mapName.isPresent() || map.getMapName().equals(mapName))
-                ).collect(Collectors.toList());
+        List<Map> maps = mapRepository.findAllByWorkspaceName(workSpaceName).stream()
+                .filter(map ->
+                        (mapName.isEmpty() || map.getMapName().equals(mapName.get()))
+                )
+                .collect(Collectors.toList());
         return maps;
-
     }
+
 
     public void deleteLayer(String workSpaceName, String layerName) {
         headers.setContentType(MediaType.APPLICATION_JSON);

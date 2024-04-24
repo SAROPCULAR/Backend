@@ -21,6 +21,8 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
+
+    /*
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
 
         var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
@@ -41,17 +43,20 @@ public class UserServiceImpl implements UserService {
         repository.save(user);
     }
 
-    public List<User> findAllUser(Optional<String> email, Optional<String> id,Optional<String> name,Optional<String> teamName){
+     */
+
+    public List<User> findAllUser(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName) {
         List<User> users = repository.findAll().stream()
                 .filter(user ->
-                        ((!email.isPresent()|| user.getEmail().equals(email)) ||
-                                (!id.isPresent() || user.getId().equals(id)) ||
-                                (!name.isPresent() || (user.getName()).equals(name))
-                                || (!teamName.isPresent() || (user.getTeam().getName()).equals(teamName)))
-                                && (user.getStatus() == UserStatus.VERIFIED)
+                        (email.isEmpty() || user.getEmail().equals(email.get())) &&
+                                (id.isEmpty() || user.getId().equals(id.get())) &&
+                                (name.isEmpty() || user.getName().equals(name.get())) &&
+                                (teamName.isEmpty() || user.getTeam().getName().equals(teamName.get())) &&
+                                user.getStatus() == UserStatus.VERIFIED
                 )
                 .collect(Collectors.toList());
         return users;
     }
+
 
 }

@@ -57,21 +57,21 @@ public class TeamLocationServiceImpl implements TeamLocationService {
 
     @Override
     public List<TeamLocation> getAllTeamLocations(Optional<String> teamName, Optional<String> name,
-                                                  Optional<String> provinceCode,Optional<String> provinceName,
-                                                  Optional<String> countyName
-                                                  ) {
+                                                  Optional<String> provinceCode, Optional<String> provinceName,
+                                                  Optional<String> countyName) {
         List<TeamLocation> teamLocations = teamLocationRepository.findAll().stream()
                 .filter(teamLocation ->
-                        (!teamName.isPresent() || teamLocation.getTeam().getName().equals(teamName)) ||
-                                (!name.isPresent() || teamLocation.getName().equals(name)) ||
-                                (!provinceCode.isPresent() || teamLocation.getProvinceCode().equals(provinceCode)) ||
-                                (!provinceName.isPresent() || teamLocation.getProvinceName().equals(provinceName)) ||
-                                (!countyName.isPresent() || teamLocation.getCountyName().equals(countyName))
-                ).collect(Collectors.toList());
-
+                        (teamName.isEmpty() || teamLocation.getTeam().getName().equals(teamName.get())) &&
+                                (name.isEmpty() || teamLocation.getName().equals(name.get())) &&
+                                (provinceCode.isEmpty() || teamLocation.getProvinceCode().equals(provinceCode.get())) &&
+                                (provinceName.isEmpty() || teamLocation.getProvinceName().equals(provinceName.get())) &&
+                                (countyName.isEmpty() || teamLocation.getCountyName().equals(countyName.get()))
+                )
+                .collect(Collectors.toList());
 
         return teamLocations;
     }
+
 
     @Override
     public void deleteTeamLocation(String id) {

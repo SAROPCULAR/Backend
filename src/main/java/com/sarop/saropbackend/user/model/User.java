@@ -30,7 +30,7 @@ public class User  {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Token> tokens;
 
     @Column
