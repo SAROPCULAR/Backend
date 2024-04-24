@@ -43,7 +43,7 @@ public class Operation {
     @JoinColumn(name="team_id")
     private Team team;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "operation_map",
             joinColumns = @JoinColumn(name = "operation_id"),

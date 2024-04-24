@@ -36,6 +36,7 @@ public class OperationServiceImpl implements OperationService {
 
     private final CategoryRepository categoryRepository;
 
+    /*
     @PostConstruct
     public void loadDataFromAPI() {
 
@@ -82,55 +83,81 @@ public class OperationServiceImpl implements OperationService {
             System.out.println("Error fetching data from API. Status code: " + responseEntity.getStatusCodeValue());
         }
     }
+
+
+
+     */
+
     @Override
     public Operation addOperation(OperationSaveRequest operationSaveRequest) {
         Team team = teamRepository.findTeamByName(operationSaveRequest.getTeamName());
         Category category = categoryRepository.findCategoryByName(operationSaveRequest.getCategoryName());
-        var operation = Operation.builder().id(Util.generateUUID())
+
+        var operation = Operation.builder()
+                .id(Util.generateUUID())
                 .name(operationSaveRequest.getName())
                 .operationDate(operationSaveRequest.getOperationDate())
                 .operationNumber(operationSaveRequest.getOperationNumber())
-                .team(team).category(category).maps(new ArrayList<Map>()).build();
-        for(String mapName : operationSaveRequest.getMaps()){
+                .team(team)
+                .category(category)
+                .maps(new ArrayList<>())
+                .build();
+        operationRepository.save(operation);
+        for (String mapName : operationSaveRequest.getMaps()) {
             Map map = mapRepository.findMapByMapName(mapName);
-            operation.getMaps().add(map);
+            if (map != null) { // Check if map is found
+                operation.getMaps().add(map);
+                map.getOperations().add(operation); // Add operation to the map's list of operations
+            }
         }
+
         return operationRepository.save(operation);
     }
+
 
     @Override
     public Operation updateOperation(String id, OperationSaveRequest operationUpdateRequest) {
         Team team = teamRepository.findTeamByName(operationUpdateRequest.getTeamName());
         Category category = categoryRepository.findCategoryByName(operationUpdateRequest.getCategoryName());
-        List<Map> maps = new ArrayList<Map>();
-        for(String mapName : operationUpdateRequest.getMaps()){
+
+        // Retrieve maps for the operation
+        List<Map> maps = new ArrayList<>();
+        for (String mapName : operationUpdateRequest.getMaps()) {
             Map map = mapRepository.findMapByMapName(mapName);
-            maps.add(map);
+            if (map != null) {
+                maps.add(map);
+            }
         }
+
         Operation operation = operationRepository.findById(id).orElseThrow();
         operation.setName(operationUpdateRequest.getName());
         operation.setOperationNumber(operationUpdateRequest.getOperationNumber());
         operation.setOperationDate(operationUpdateRequest.getOperationDate());
         operation.setCategory(category);
         operation.setTeam(team);
-        operation.setMaps(maps);
-        return operationRepository.save(operation);
 
+        // Update the maps associated with the operation
+        operation.getMaps().clear(); // Clear existing maps
+        operation.getMaps().addAll(maps); // Add updated maps
+
+        return operationRepository.save(operation);
     }
+
 
     @Override
-    public List<Operation> getAllOperations(Optional<Integer> operationNumber,Optional<String> operationDate,
-                                            Optional<String> name,Optional<String> categoryName,Optional<String> teamName
-                                            ) {
+    public List<Operation> getAllOperations(Optional<Integer> operationNumber, Optional<String> operationDate,
+                                            Optional<String> name, Optional<String> categoryName, Optional<String> teamName) {
         List<Operation> operations = operationRepository.findAll().stream().filter(operation ->
-                        (!operationNumber.isPresent() || operationNumber.equals(operation.getOperationNumber())) ||
-                                (!operationDate.isPresent() || operation.getOperationDate().equals(operationDate)) ||
-                                (!name.isPresent() || operation.getName().equals(name)) ||
-                                (!categoryName.isPresent() || operation.getCategory().getName().equals(categoryName))
-                || (!teamName.isPresent() || operation.getTeam().getName().equals(teamName))
-                ).collect(Collectors.toList());
+                (operationNumber.isEmpty() || operationNumber.get().equals(operation.getOperationNumber())) &&
+                        (operationDate.isEmpty() || operationDate.get().equals(operation.getOperationDate())) &&
+                        (name.isEmpty() || name.get().equals(operation.getName())) &&
+                        (categoryName.isEmpty() || categoryName.get().equals(operation.getCategory().getName())) &&
+                        (teamName.isEmpty() || teamName.get().equals(operation.getTeam().getName()))
+        ).collect(Collectors.toList());
+
         return operations;
     }
+
 
     @Override
     public void deleteOperation(String id) {

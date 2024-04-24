@@ -30,7 +30,7 @@ public class Map {
     private Workspace workspace;
 
     @ManyToMany(cascade = CascadeType.ALL)
-    private List<Operation> operation;
+    private List<Operation> operations;
 
 
 }
