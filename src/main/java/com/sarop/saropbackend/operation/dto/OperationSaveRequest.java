@@ -16,7 +16,7 @@ public class OperationSaveRequest {
     private int operationNumber;
     private String operationDate;
     private String name;
-    private String categoryName;
-    private String teamName;
+    private String categoryId;
+    private String teamId;
     private List<String> maps;
 }

@@ -1,15 +1,12 @@
-package com.sarop.saropbackend.category.model;
+package com.sarop.saropbackend.common;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.sarop.saropbackend.operation.model.Operation;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Data
@@ -17,17 +14,16 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "category")
-public class Category {
+@Table(name="coordinate")
+public class Coordinate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @Column
-    private String name;
+    private double x;
 
-    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
-
-    private List<Operation> operations;
+    @Column
+    private double y;
 }

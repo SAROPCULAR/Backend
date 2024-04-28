@@ -3,6 +3,12 @@ package com.sarop.saropbackend.restapi.service;
 
 
 import com.sarop.saropbackend.common.Util;
+import com.sarop.saropbackend.note.model.Note;
+import com.sarop.saropbackend.note.repository.NoteRepository;
+import com.sarop.saropbackend.operation.model.Operation;
+import com.sarop.saropbackend.operation.repository.OperationRepository;
+import com.sarop.saropbackend.polygon.model.Polygon;
+import com.sarop.saropbackend.polygon.repository.PolygonRepository;
 import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.entity.Workspace;
 import com.sarop.saropbackend.restapi.repository.MapRepository;
@@ -12,6 +18,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,18 +47,25 @@ public class ManageServiceImpl implements ManageService {
 
     private final WorkspaceRepository workspaceRepository;
 
+    private final NoteRepository noteRepository;
+
+    private final PolygonRepository polygonRepository;
+    private final OperationRepository operationRepository;
     public ManageServiceImpl(RestTemplate restTemplate,
                              MapRepository mapRepository,
                              WorkspaceRepository workspaceRepository,
                              @Value("${geoserver.url}") String geoserverUrl,
                              @Value("${geoserver.username}") String username,
-                             @Value("${geoserver.password}") String password) {
+                             @Value("${geoserver.password}") String password, NoteRepository noteRepository, PolygonRepository polygonRepository, OperationRepository operationRepository) {
         this.restTemplate = restTemplate;
         this.mapRepository = mapRepository;
         this.workspaceRepository = workspaceRepository;
         this.geoserverUrl = geoserverUrl;
         this.username = username;
         this.password = password;
+        this.noteRepository = noteRepository;
+        this.polygonRepository = polygonRepository;
+        this.operationRepository = operationRepository;
         headers = new HttpHeaders();
         headers.setBasicAuth(this.username, this.password);
     }
@@ -112,16 +128,66 @@ public class ManageServiceImpl implements ManageService {
         String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName + "/layers/" + layerName;
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
 
-        mapRepository.deleteByMapName(layerName);
+        Map map = mapRepository.findMapByMapName(layerName);
+        if(map.getNotes() != null){
+            for(Note note : map.getNotes()){
+                noteRepository.delete(note);
+            }
+        }
+        if(map.getPolygons() != null){
+            for(Polygon polygon: map.getPolygons()){
+                polygonRepository.delete(polygon);
+            }
+        }
+        if(map.getOperations() != null){
+            for(Operation operation : map.getOperations()){
+                operation.getMaps().remove(map);
+                operationRepository.save(operation);
+            }
+        }
+
+        mapRepository.delete(map);
+
     }
 
+    private String GdalConvert(String ecwPath){
+        try {
+            String outputPath = "C:/Users/cikla/OneDrive/Masaüstü/output.tif";
+            // Command to convert ECW to TIFF
+            String[] command = {"gdal_translate", "-of", "GTiff", ecwPath, outputPath};
+
+            // Create ProcessBuilder
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+
+            // Redirect error stream to output stream
+            processBuilder.redirectErrorStream(true);
+
+            // Start the process
+            Process process = processBuilder.start();
+
+            // Get the output of the process
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            // Wait for the process to finish
+            int exitCode = process.waitFor();
+            System.out.println("Process exited with code: " + exitCode);
+            return "file:///" + outputPath;
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
 
 
     public void postCoverageStore(String workspaceName,String layerName,String fileUrl){
         try {
             headers.setContentType(MediaType.APPLICATION_JSON);
-
+           // fileUrl = GdalConvert(fileUrl);
             String mapType = fileUrl.substring(fileUrl.lastIndexOf(".") +1);
             if(mapType.equals("tif")){
                 mapType = "GeoTIFF";

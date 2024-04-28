@@ -2,6 +2,8 @@ package com.sarop.saropbackend.team.service.impl;
 
 import com.sarop.saropbackend.common.Util;
 
+import com.sarop.saropbackend.operation.model.Operation;
+import com.sarop.saropbackend.operation.repository.OperationRepository;
 import com.sarop.saropbackend.team.dto.TeamSaveRequest;
 import com.sarop.saropbackend.team.dto.apimodels.OperationalTeamApiModel;
 import com.sarop.saropbackend.team.dto.apimodels.OperationalTeamLocation;
@@ -42,9 +44,11 @@ public class TeamServiceImpl implements TeamService {
 
     private final PasswordEncoder passwordEncoder;
 
-    /*
+    private final OperationRepository operationRepository;
+
+
     @PostConstruct
-    //@Transactional
+    @Transactional
     public void loadDataFromApi() {
         String apiUrl = "https://portal.akut.org.tr/api/webpage/getteamlist";
         RestTemplate restTemplate = new RestTemplate();
@@ -101,7 +105,7 @@ public class TeamServiceImpl implements TeamService {
             }
         }
     }
-    */
+
 
     @Override
     @Transactional
@@ -115,7 +119,7 @@ public class TeamServiceImpl implements TeamService {
                 .provinceName(teamSaveRequest.getProvinceName())
                 .phoneDescription(teamSaveRequest.getPhoneDescription())
                 .teamLocations(new ArrayList<>())
-                .members(new ArrayList<>())
+                .members(new ArrayList<>()).operations(new ArrayList<>())
                 .build();
 
         // Save the team
@@ -140,8 +144,8 @@ public class TeamServiceImpl implements TeamService {
         userRepository.saveAll(membersToSave);
 
         // Add team locations
-        for (String name : teamSaveRequest.getTeamLocations()) {
-            TeamLocation teamLocation = teamLocationRepository.findTeamLocationByName(name);
+        for (String id : teamSaveRequest.getTeamLocations()) {
+            TeamLocation teamLocation = teamLocationRepository.findById(id).orElseThrow();
             teamLocation.setTeam(team);
             team.getTeamLocations().add(teamLocation);
         }
@@ -182,8 +186,8 @@ public class TeamServiceImpl implements TeamService {
             teamLocation.setTeam(null);
         }
         team.getTeamLocations().clear();
-        for (String name : teamUpdateRequest.getTeamLocations()) {
-            TeamLocation teamLocation = teamLocationRepository.findTeamLocationByName(name);
+        for (String locationId : teamUpdateRequest.getTeamLocations()) {
+            TeamLocation teamLocation = teamLocationRepository.findById(locationId).orElseThrow();
             team.getTeamLocations().add(teamLocation);
             teamLocation.setTeam(team);
         }
@@ -224,7 +228,32 @@ public class TeamServiceImpl implements TeamService {
 
 
     @Override
+    @Transactional
     public void deleteTeam(String id) {
-        teamRepository.deleteById(id);
+            Team team = teamRepository.findById(id).orElseThrow();
+
+            // Explicitly delete TeamLocations associated with the Team
+            for (TeamLocation location : team.getTeamLocations()) {
+                location.setTeam(null);
+                teamLocationRepository.save(location);
+            }
+
+            // Explicitly delete Operations associated with the Team
+            for (Operation operation : team.getOperations()) {
+                operation.setTeam(null);
+                operationRepository.save(operation);
+            }
+            User teamLeader = team.getTeamLeader();
+            teamLeader.setRole(Role.USER);
+            // Remove team reference from Users (avoid deleting Users)
+            for (User user : team.getMembers()) {
+                user.setTeam(null);
+                userRepository.save(user); // Update the User entity
+            }
+
+            // Finally, delete the Team entity
+            teamRepository.delete(team);
+
+
     }
 }

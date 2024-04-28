@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Data
@@ -35,19 +36,37 @@ public class Operation {
     @Column
     private String name;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name="team_id")
     private Team team;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany( fetch = FetchType.EAGER)
     @JoinTable(
             name = "operation_map",
             joinColumns = @JoinColumn(name = "operation_id"),
             inverseJoinColumns = @JoinColumn(name = "map_id")
     )
     private List<Map> maps;
+
+    @Override
+    public String toString() {
+        String mapIds = maps != null ? maps.stream()
+                .map(Map::getId)
+                .collect(Collectors.toList())
+                .toString()
+                : "[]";
+        return "Operation{" +
+                "id='" + id + '\'' +
+                ", operationNumber=" + operationNumber +
+                ", operationDate='" + operationDate + '\'' +
+                ", name='" + name + '\'' +
+                ", categoryId='" + (category != null ? category.getId() : null) + '\'' +
+                ", teamId='" + (team != null ? team.getId() : null) + '\'' +
+                ", mapIds=" + mapIds +
+                '}';
+    }
 }

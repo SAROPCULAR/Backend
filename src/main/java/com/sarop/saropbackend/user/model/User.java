@@ -2,6 +2,7 @@ package com.sarop.saropbackend.user.model;
 
 
 import com.fasterxml.jackson.annotation.*;
+import com.sarop.saropbackend.note.model.Note;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.token.model.Token;
 import jakarta.persistence.*;
@@ -30,16 +31,18 @@ public class User  {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany( fetch = FetchType.EAGER)
     private List<Token> tokens;
 
     @Column
     private UserStatus status;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "team_id")
     private Team team;
 
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<Note> notes;
 
 
 
