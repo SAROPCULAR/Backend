@@ -29,5 +29,5 @@ public class UserSaveRequest {
 
     private Role role;
 
-    private String teamName;
+    private String teamId;
 }

@@ -2,6 +2,8 @@ package com.sarop.saropbackend.teamLocation.service.impl;
 
 
 import com.sarop.saropbackend.common.Util;
+import com.sarop.saropbackend.team.model.Team;
+import com.sarop.saropbackend.team.repository.TeamRepository;
 import com.sarop.saropbackend.teamLocation.dto.TeamLocationSaveRequest;
 import com.sarop.saropbackend.teamLocation.model.TeamLocation;
 import com.sarop.saropbackend.teamLocation.repository.TeamLocationRepository;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class TeamLocationServiceImpl implements TeamLocationService {
 
     private final TeamLocationRepository teamLocationRepository;
+    private final TeamRepository teamRepository;
 
     @Override
     @Transactional
@@ -75,6 +78,17 @@ public class TeamLocationServiceImpl implements TeamLocationService {
 
     @Override
     public void deleteTeamLocation(String id) {
-        teamLocationRepository.deleteById(id);
+
+        Optional<TeamLocation> teamLocationOptional = teamLocationRepository.findById(id);
+        if (teamLocationOptional.isPresent()) {
+            TeamLocation teamLocation = teamLocationOptional.get();
+            Team team = teamLocation.getTeam();
+            if (team != null) {
+                team.getTeamLocations().remove(teamLocation);
+                teamRepository.save(team); // Save the updated team to reflect the changes
+            }
+            teamLocationRepository.deleteById(id);
+        }
     }
+
 }

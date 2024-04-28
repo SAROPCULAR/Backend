@@ -23,5 +23,5 @@ public class UserUpdateRequest {
     @NotNull
     private Role role;
 
-    private String teamName;
+    private String teamId;
 }

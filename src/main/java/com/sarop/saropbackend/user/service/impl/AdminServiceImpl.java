@@ -2,6 +2,8 @@ package com.sarop.saropbackend.user.service.impl;
 
 
 import com.sarop.saropbackend.exception.UserNotFoundException;
+import com.sarop.saropbackend.note.model.Note;
+import com.sarop.saropbackend.note.repository.NoteRepository;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.team.repository.TeamRepository;
 import com.sarop.saropbackend.user.dto.UserSaveRequest;
@@ -33,6 +35,8 @@ public class AdminServiceImpl implements AdminService {
 
     private final TeamRepository teamRepository;
 
+    private final NoteRepository noteRepository;
+
     @PostConstruct
     public void initializeAdminUser() {
         if(!userRepository.existsByRole(Role.ADMIN)){
@@ -46,7 +50,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Transactional
     public User saveUser(UserSaveRequest userSaveRequest) {
-        Team team = teamRepository.findTeamByName(userSaveRequest.getTeamName());
+        Team team = teamRepository.findById(userSaveRequest.getTeamId()).orElseThrow();
         var user = User.builder().name(userSaveRequest.getName()).
                 email(userSaveRequest.getEmail()).
                 password(passwordEncoder.encode(userSaveRequest.getPassword())).
@@ -58,16 +62,35 @@ public class AdminServiceImpl implements AdminService {
     public User updateUser(String id, UserUpdateRequest userUpdateRequest) {
         User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException());
         user.setName(userUpdateRequest.getName());
-        user.setEmail(userUpdateRequest.getEmail());
+        if(user.getEmail() != userUpdateRequest.getEmail()){
+            user.setEmail(userUpdateRequest.getEmail());
+        }
         user.setPassword(passwordEncoder.encode(userUpdateRequest.getPassword()));
-        Team team = teamRepository.findTeamByName(userUpdateRequest.getTeamName());
+        Team team = teamRepository.findById(userUpdateRequest.getTeamId()).orElseThrow();
+        if(team.getTeamLeader().equals(user)){
+            team.setTeamLeader(null);
+            user.setRole(Role.USER);
+        }
         user.setTeam(team);
         return userRepository.save(user);
     }
 
     @Transactional
     public void deleteUser(String id) {
-        User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException());
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
+        for (Note note : user.getNotes()) {
+            note.getMap().getNotes().remove(note);
+            noteRepository.delete(note);
+        }
+
+        if (user.getTeam() != null) {
+            if(user.getTeam().getTeamLeader().equals(user)){
+                user.getTeam().setTeamLeader(null);
+            }
+            user.getTeam().getMembers().remove(user);
+        }
+
+
         userRepository.delete(user);
     }
 

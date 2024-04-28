@@ -1,5 +1,7 @@
 package com.sarop.saropbackend.restapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +27,6 @@ public class Workspace {
     @Column
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany()
     private List<Map> maps;
 }
