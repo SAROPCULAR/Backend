@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostCoverageStoreRequest {
-    private String layerName;
-    private String mapDescription;
+public class WorkspaceRequest {
+    private String workspaceName;
+
 }
