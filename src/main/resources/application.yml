@@ -4,6 +4,10 @@ spring:
     username: postgres
     password: 12345
     driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -33,5 +37,7 @@ geoserver:
   url: http://localhost:8080/geoserver/rest
   username: admin
   password: geoserver
+
+
 
 

@@ -32,6 +32,12 @@ public class Map {
     @Column(nullable=false)
     private String fileUrl;
 
+    @Column(nullable = false)
+    private String mapDescription;
+
+    @Column(nullable = false)
+    private String displayUrl;
+
     @ManyToOne()
     private Workspace workspace;
 

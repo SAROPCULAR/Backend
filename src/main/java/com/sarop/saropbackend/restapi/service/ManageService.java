@@ -2,6 +2,7 @@ package com.sarop.saropbackend.restapi.service;
 
 import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.entity.Workspace;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,5 +18,5 @@ public interface ManageService {
     void deleteLayer(String workSpaceName, String layerName);
 
 
-    void postCoverageStore(String workspace,String layerName,String fileUrl);
+    void postCoverageStore(String workspaceName, String layerName, String mapDescription, MultipartFile file);
 }

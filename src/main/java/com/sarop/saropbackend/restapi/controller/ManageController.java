@@ -1,12 +1,13 @@
 package com.sarop.saropbackend.restapi.controller;
 
-import com.sarop.saropbackend.restapi.dto.PostCoverageStoreRequest;
+import com.sarop.saropbackend.restapi.dto.WorkspaceRequest;
 import com.sarop.saropbackend.restapi.service.ManageService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.Optional;
@@ -30,11 +31,12 @@ public class ManageController {
 
     @PostMapping("/workspaces")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<?> postWorkspace(@RequestBody String workSpaceName) {
-        manageService.postWorkspace(workSpaceName);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> postWorkspace(@RequestBody WorkspaceRequest request) {
 
+        manageService.postWorkspace(request.getWorkspaceName());
+        return ResponseEntity.ok().build();
     }
+
     @DeleteMapping("/workspaces/{workspaceName}")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<?> deleteWorkSpace(@PathVariable("workspaceName") String workSpaceName) {
@@ -59,8 +61,10 @@ public class ManageController {
 
     @PostMapping("/workspaces/{workspaceName}/coveragestores")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<?> postCoverageStore(@PathVariable("workspaceName")String workspaceName,@RequestBody PostCoverageStoreRequest request ) {
-        manageService.postCoverageStore(workspaceName,request.getLayerName(),request.getFileUrl());
+    public ResponseEntity<?> postCoverageStore(@PathVariable("workspaceName")String workspaceName, @RequestParam("layerName") String layerName,
+                                               @RequestParam("description") String mapDescription,
+                                               @RequestParam("file") MultipartFile file) {
+        manageService.postCoverageStore(workspaceName,layerName,mapDescription,file);
         return ResponseEntity.ok().build();
 
     }

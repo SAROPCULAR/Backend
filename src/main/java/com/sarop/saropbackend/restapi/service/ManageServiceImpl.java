@@ -1,7 +1,6 @@
 package com.sarop.saropbackend.restapi.service;
 
 
-
 import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.note.model.Note;
 import com.sarop.saropbackend.note.repository.NoteRepository;
@@ -17,8 +16,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -127,8 +128,8 @@ public class ManageServiceImpl implements ManageService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName + "/layers/" + layerName;
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
-
-        Map map = mapRepository.findMapByMapName(layerName);
+        Workspace workspace = workspaceRepository.findWorkspaceByName(workSpaceName).orElseThrow();
+        Map map = mapRepository.findMapByMapNameAndAndWorkspace(layerName,workspace);
         if(map.getNotes() != null){
             for(Note note : map.getNotes()){
                 noteRepository.delete(note);
@@ -182,18 +183,44 @@ public class ManageServiceImpl implements ManageService {
         return "";
     }
 
+    private String saveFileToLocal(MultipartFile file, String layerName) throws IOException {
+        String directory = "C:/Users/cikla/OneDrive/Masaüstü/DERSLER/23-24 Spring Term/Bitirme/src/main/resources/maps"; // Change this to your directory path
+        String fileName = layerName + "." + getFileExtension(file.getOriginalFilename());
+        String filePath = directory + "/" + fileName;
+        File localFile = new File(filePath);
+        file.transferTo(localFile);
+        return filePath;
+    }
 
+    private String getFileExtension(String fileName) {
+        if (fileName != null && fileName.contains(".")) {
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+        }
+        return "";
+    }
 
-    public void postCoverageStore(String workspaceName,String layerName,String fileUrl){
+    private String determineMapType(String filePath) {
+        String mapType = "";
+        String extension = getFileExtension(filePath).toLowerCase();
+        if (extension.equals("tif") || extension.equals("tiff")) {
+            mapType = "GeoTIFF";
+        } else if (extension.equals("ecw")) {
+            mapType = "ECW";
+        }
+        return mapType;
+    }
+
+    public void postCoverageStore(String workspaceName, String layerName, String description, MultipartFile file) {
         try {
             headers.setContentType(MediaType.APPLICATION_JSON);
-           // fileUrl = GdalConvert(fileUrl);
-            String mapType = fileUrl.substring(fileUrl.lastIndexOf(".") +1);
-            if(mapType.equals("tif")){
-                mapType = "GeoTIFF";
-            }else if(mapType.equals("ecw")){
-                mapType = "ECW";
-            }
+
+            // Save the file to local storage
+            String localFilePath = saveFileToLocal(file, layerName);
+
+            // Determine map type
+            String mapType = determineMapType(localFilePath);
+
+            String displayUrl = "http://localhost:8080/geoserver/" +workspaceName + "/wms";
 
             // Include workspace in the JSON payload
             String requestBody = "{\n" +
@@ -202,7 +229,7 @@ public class ManageServiceImpl implements ManageService {
                     "    \"enabled\": true,\n" +
                     "    \"type\": \"" + mapType + "\",\n" +
                     "    \"workspace\": \"" + workspaceName + "\",\n" +
-                    "    \"url\": \"" + fileUrl + "\"\n" +
+                    "    \"url\": \"" + localFilePath + "\"\n" +
                     "  }\n" +
                     "}";
 
@@ -212,7 +239,9 @@ public class ManageServiceImpl implements ManageService {
 
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.postForEntity(apiUrl, requestEntity, String.class);
-            String nativeName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1,fileUrl.lastIndexOf("."));
+
+            // Add coverage
+            String nativeName = localFilePath.substring(localFilePath.lastIndexOf("/") + 1,localFilePath.lastIndexOf("."));
             String coverageJson = "{" +
                     "\"coverage\": {" +
                     "\"nativeName\": \"" + nativeName + "\"," +
@@ -227,16 +256,17 @@ public class ManageServiceImpl implements ManageService {
                     "\"projectionPolicy\": \"REPROJECT_TO_DECLARED\"" +
                     "}" +
                     "}";
-            addCoverage(workspaceName,layerName,coverageJson);
+            addCoverage(workspaceName, layerName, coverageJson);
+
             var workspace = workspaceRepository.findWorkspaceByName(workspaceName).orElseThrow();
             Map map = Map.builder().id(Util.generateUUID()).mapName(layerName)
-                    .fileUrl(fileUrl).mapType(mapType).workspace(workspace).build();
+                    .fileUrl(localFilePath).mapType(mapType).mapDescription(description).workspace(workspace).displayUrl(displayUrl).build();
             mapRepository.save(map);
         } catch (Exception e) {
             e.printStackTrace();
-
         }
     }
+
 
     private void addCoverage(String workspace, String coverageStore, String coverageJson) {
         try {
