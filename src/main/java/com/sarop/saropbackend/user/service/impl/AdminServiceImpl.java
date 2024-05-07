@@ -50,12 +50,23 @@ public class AdminServiceImpl implements AdminService {
 
     @Transactional
     public User saveUser(UserSaveRequest userSaveRequest) {
-        Team team = teamRepository.findById(userSaveRequest.getTeamId()).orElseThrow();
-        var user = User.builder().name(userSaveRequest.getName()).
-                email(userSaveRequest.getEmail()).
-                password(passwordEncoder.encode(userSaveRequest.getPassword())).
-                role(userSaveRequest.getRole()).status(UserStatus.VERIFIED).team(team).build();
-        return userRepository.save(user);
+
+        if(!teamRepository.findById(userSaveRequest.getTeamId()).isPresent()){
+            var user = User.builder().name(userSaveRequest.getName()).
+                    email(userSaveRequest.getEmail()).
+                    password(passwordEncoder.encode(userSaveRequest.getPassword())).
+                    role(userSaveRequest.getRole()).status(UserStatus.VERIFIED).build();
+            return userRepository.save(user);
+        }else{
+            Team team = teamRepository.findById(userSaveRequest.getTeamId()).orElseThrow();
+            var user = User.builder().name(userSaveRequest.getName()).
+                    email(userSaveRequest.getEmail()).
+                    password(passwordEncoder.encode(userSaveRequest.getPassword())).
+                    role(userSaveRequest.getRole()).status(UserStatus.VERIFIED).team(team).build();
+            return userRepository.save(user);
+        }
+
+
     }
 
     @Transactional
@@ -66,12 +77,15 @@ public class AdminServiceImpl implements AdminService {
             user.setEmail(userUpdateRequest.getEmail());
         }
         user.setPassword(passwordEncoder.encode(userUpdateRequest.getPassword()));
-        Team team = teamRepository.findById(userUpdateRequest.getTeamId()).orElseThrow();
-        if(team.getTeamLeader().equals(user)){
-            team.setTeamLeader(null);
-            user.setRole(Role.USER);
+        if(teamRepository.findById(userUpdateRequest.getTeamId()).isPresent()){
+            Team team = teamRepository.findById(userUpdateRequest.getTeamId()).orElseThrow();
+            if(team.getTeamLeader().equals(user)){
+                team.setTeamLeader(null);
+                user.setRole(Role.USER);
+            }
+            user.setTeam(team);
         }
-        user.setTeam(team);
+
         return userRepository.save(user);
     }
 
