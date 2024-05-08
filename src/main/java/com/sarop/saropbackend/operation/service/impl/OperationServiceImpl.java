@@ -4,8 +4,6 @@ import com.sarop.saropbackend.category.model.Category;
 import com.sarop.saropbackend.category.repository.CategoryRepository;
 import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.operation.dto.OperationSaveRequest;
-import com.sarop.saropbackend.operation.dto.apimodels.OperationApiModel;
-import com.sarop.saropbackend.operation.dto.apiresponse.OperationListApiResponse;
 import com.sarop.saropbackend.operation.model.Operation;
 import com.sarop.saropbackend.operation.repository.OperationRepository;
 import com.sarop.saropbackend.operation.service.OperationService;
@@ -13,12 +11,8 @@ import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.repository.MapRepository;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.team.repository.TeamRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +31,7 @@ public class OperationServiceImpl implements OperationService {
     private final CategoryRepository categoryRepository;
 
 
+    /*
     @PostConstruct
     public void loadDataFromAPI() {
 
@@ -84,30 +79,38 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
+     */
+
 
 
 
 
     @Override
     public Operation addOperation(OperationSaveRequest operationSaveRequest) {
-        Team team = teamRepository.findById(operationSaveRequest.getTeamId()).orElseThrow();
-        Category category = categoryRepository.findById(operationSaveRequest.getCategoryId()).orElseThrow();
+
+
 
         var operation = Operation.builder()
                 .id(Util.generateUUID())
                 .name(operationSaveRequest.getName())
                 .operationDate(operationSaveRequest.getOperationDate())
                 .operationNumber(operationSaveRequest.getOperationNumber())
-                .team(team)
-                .category(category)
                 .maps(new ArrayList<>())
                 .build();
 
         operationRepository.save(operation);
-        category.getOperations().add(operation);
-       // categoryRepository.save(category);
-        team.getOperations().add(operation);
-     //   teamRepository.save(team);
+        if(teamRepository.findById(operationSaveRequest.getTeamId()).isPresent()){
+            Team team = teamRepository.findById(operationSaveRequest.getTeamId()).orElseThrow();
+            operation.setTeam(team);
+            team.getOperations().add(operation);
+        }
+        if(categoryRepository.findById(operationSaveRequest.getCategoryId()).isPresent()){
+            Category category = categoryRepository.findById(operationSaveRequest.getCategoryId()).orElseThrow();
+            operation.setCategory(category);
+            category.getOperations().add(operation);
+        }
+
+
         for (String mapId : operationSaveRequest.getMaps()) {
             Map map = mapRepository.findById(mapId).orElseThrow();
             if (map != null) { // Check if map is found
@@ -115,7 +118,6 @@ public class OperationServiceImpl implements OperationService {
                 map.getOperations().add(operation); // Add operation to the map's list of operations
             }
         }
-       // mapRepository.saveAll(operation.getMaps());
 
         return operationRepository.save(operation);
     }

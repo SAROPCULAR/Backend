@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,7 +111,44 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             }
         }
     }
-    /*
+
+/*
+    public AuthenticationResponse authenticateWithGoogle(OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return registerWithGoogle(email, principal);
+        } else {
+            return loginWithGoogle(user);
+        }
+    }
+
+    private AuthenticationResponse registerWithGoogle(String email, OAuth2User user) {
+        User newUser = User.builder()
+                .email(email)
+                .name(user.getAttribute("name"))
+                .role(Role.USER)
+                .status(UserStatus.VERIFIED) // Assuming user is verified instantly with Google login
+                .build();
+
+        var savedUser = userRepository.save(newUser);
+        var jwtToken = jwtService.generateToken(savedUser);
+        var refreshToken = jwtService.generateRefreshToken(savedUser);
+        return AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    private AuthenticationResponse loginWithGoogle(User user) {
+        var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+        return AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
     @Override
     public AuthenticationResponse authenticateWithGoogle(OAuth2User principal) {
 

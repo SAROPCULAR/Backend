@@ -5,10 +5,6 @@ import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.operation.model.Operation;
 import com.sarop.saropbackend.operation.repository.OperationRepository;
 import com.sarop.saropbackend.team.dto.TeamSaveRequest;
-import com.sarop.saropbackend.team.dto.apimodels.OperationalTeamApiModel;
-import com.sarop.saropbackend.team.dto.apimodels.OperationalTeamLocation;
-
-import com.sarop.saropbackend.team.dto.apiresponse.OperationalTeamResponse;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.team.repository.TeamRepository;
 import com.sarop.saropbackend.team.service.TeamService;
@@ -16,16 +12,12 @@ import com.sarop.saropbackend.teamLocation.model.TeamLocation;
 import com.sarop.saropbackend.teamLocation.repository.TeamLocationRepository;
 import com.sarop.saropbackend.user.model.Role;
 import com.sarop.saropbackend.user.model.User;
-import com.sarop.saropbackend.user.model.UserStatus;
 import com.sarop.saropbackend.user.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +38,7 @@ public class TeamServiceImpl implements TeamService {
 
     private final OperationRepository operationRepository;
 
-
+    /*
     @PostConstruct
     @Transactional
     public void loadDataFromApi() {
@@ -106,6 +98,8 @@ public class TeamServiceImpl implements TeamService {
         }
     }
 
+     */
+
 
     @Override
     @Transactional
@@ -124,12 +118,14 @@ public class TeamServiceImpl implements TeamService {
 
         // Save the team
         team = teamRepository.save(team);
+        if(userRepository.findByEmail(teamSaveRequest.getTeamLeaderEmail()).isPresent()){
+            User teamLeader = userRepository.findByEmail(teamSaveRequest.getTeamLeaderEmail()).orElseThrow();
+            teamLeader.setRole(Role.OPERATION_ADMIN);
+            team.setTeamLeader(teamLeader);
+            teamLeader.setTeam(team);
+            userRepository.save(teamLeader);
+        }
 
-        // Find team leader and set role
-        User teamLeader = userRepository.findByEmail(teamSaveRequest.getTeamLeaderEmail()).orElseThrow();
-        teamLeader.setRole(Role.OPERATION_ADMIN);
-
-        // Create a list to store members
         List<User> membersToSave = new ArrayList<>();
 
         // Add users to the team
@@ -153,10 +149,6 @@ public class TeamServiceImpl implements TeamService {
         // Save the team locations
         teamLocationRepository.saveAll(team.getTeamLocations());
 
-        // Set team leader
-        team.setTeamLeader(teamLeader);
-        teamLeader.setTeam(team);
-        userRepository.save(teamLeader);
 
         return team;
     }
