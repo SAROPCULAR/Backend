@@ -12,6 +12,7 @@ import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.entity.Workspace;
 import com.sarop.saropbackend.restapi.repository.MapRepository;
 import com.sarop.saropbackend.restapi.repository.WorkspaceRepository;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+import org.json.JSONObject;
 
 @Service
 
@@ -204,11 +215,15 @@ public class ManageServiceImpl implements ManageService {
         String extension = getFileExtension(filePath).toLowerCase();
         if (extension.equals("tif") || extension.equals("tiff")) {
             mapType = "GeoTIFF";
-        } else if (extension.equals("ecw")) {
+        } else if (extension.equals("jpg") || extension.equals("jpeg")) {
+            mapType = "WorldImage";  // GeoServer can handle JPG files using ImageMosaic plugin
+        }else if(extension.equals("ecw")){
             mapType = "ECW";
         }
         return mapType;
     }
+
+
 
     public void postCoverageStore(String workspaceName, String layerName, String description, MultipartFile file) {
         try {
@@ -220,7 +235,6 @@ public class ManageServiceImpl implements ManageService {
             // Determine map type
             String mapType = determineMapType(localFilePath);
 
-            String displayUrl = "http://localhost:8080/geoserver/" +workspaceName + "/wms";
 
             // Include workspace in the JSON payload
             String requestBody = "{\n" +
@@ -252,12 +266,12 @@ public class ManageServiceImpl implements ManageService {
                     "\"metadataLinks\": \"\"," +
                     "\"name\": \"" + layerName + "\"," +
                     "\"title\": \"" + layerName + "\"," +
-                    "\"srs\": \"EPSG:4326\"," +
                     "\"projectionPolicy\": \"REPROJECT_TO_DECLARED\"" +
                     "}" +
                     "}";
             addCoverage(workspaceName, layerName, coverageJson);
-
+            // http://localhost:8080/geoserver/tiger/wms?service=WMS&version=1.1.0&request=GetMap&layers=tiger%3Atiger_roads&bbox=-74.02722%2C40.684221%2C-73.907005%2C40.878178&width=476&height=768&srs=EPSG%3A4326&styles=&format=application/openlayers
+            String displayUrl = getDisplayUrl(workspaceName,layerName,layerName);
             var workspace = workspaceRepository.findWorkspaceByName(workspaceName).orElseThrow();
             Map map = Map.builder().id(Util.generateUUID()).mapName(layerName)
                     .fileUrl(localFilePath).mapType(mapType).mapDescription(description).workspace(workspace).displayUrl(displayUrl).build();
@@ -266,6 +280,52 @@ public class ManageServiceImpl implements ManageService {
             e.printStackTrace();
         }
     }
+
+   private String getDisplayUrl(String workspaceName, String coverageStoreName, String layerName) {
+    String url = "http://localhost:8080/geoserver/rest/workspaces/" + workspaceName + "/coveragestores/" + coverageStoreName
+            + "/coverages/" + layerName + ".json";
+    HttpClient client = HttpClient.newHttpClient();
+
+    // Encoding username and password for basic auth
+    String auth = username + ":" + password;
+    String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+    String authHeader = "Basic " + encodedAuth;
+
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .header("Accept", "application/json")
+            .header("Authorization", authHeader)  // Add the authorization header
+            .build();
+
+    try {
+        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+        String jsonString = response.body();
+        JSONObject jsonObject = new JSONObject(jsonString);
+        JSONObject coverage = jsonObject.getJSONObject("coverage");
+        JSONObject bbox = coverage.getJSONObject("nativeBoundingBox");
+
+
+        String layer = coverage.getString("name");
+        double minx = bbox.getDouble("minx");
+        double maxx = bbox.getDouble("maxx");
+        double miny = bbox.getDouble("miny");
+        double maxy = bbox.getDouble("maxy");
+        String srs = bbox.getJSONObject("crs").getString("$").replace(":","%3A");
+        //http://localhost:8080/geoserver/MyWorkspace19/wms?service=WMS&version=1.1.0&request=GetMap&layers=MyWorkspace19%3AECWJPEG&bbox=-0.5%2C-0.5%2C4805.5%2C4805.5&width=768&height=768&srs=EPSG%3A404000&styles=&format=application/openlayers
+        // Construct WMS display URL
+        String displayUrl = "http://localhost:8080/geoserver/" +workspaceName+"/wms?service=WMS&version=1.1.0&request=GetMap&layers=" + workspaceName+"%3A" + layerName+"&bbox="+
+        minx+"%2C"+miny+"%2C"+maxx+"%2C"+maxy+"&width=476&height=768&srs="+srs+"&styles=&format=image/jpeg";
+
+
+
+        return displayUrl;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return "";
+}
+
+
 
 
     private void addCoverage(String workspace, String coverageStore, String coverageJson) {
