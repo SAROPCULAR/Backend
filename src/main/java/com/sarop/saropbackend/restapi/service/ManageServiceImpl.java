@@ -1,6 +1,9 @@
 package com.sarop.saropbackend.restapi.service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.note.model.Note;
 import com.sarop.saropbackend.note.repository.NoteRepository;
@@ -8,6 +11,9 @@ import com.sarop.saropbackend.operation.model.Operation;
 import com.sarop.saropbackend.operation.repository.OperationRepository;
 import com.sarop.saropbackend.polygon.model.Polygon;
 import com.sarop.saropbackend.polygon.repository.PolygonRepository;
+import com.sarop.saropbackend.restapi.dto.LayerGroupRequest;
+import com.sarop.saropbackend.restapi.dto.WorkspaceRequest;
+import com.sarop.saropbackend.restapi.entity.LayerGroup;
 import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.entity.Workspace;
 import com.sarop.saropbackend.restapi.repository.MapRepository;
@@ -25,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 
 import java.util.List;
@@ -139,7 +146,7 @@ public class ManageServiceImpl implements ManageService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName + "/layers/" + layerName;
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
-        Workspace workspace = workspaceRepository.findWorkspaceByName(workSpaceName).orElseThrow();
+        Workspace workspace = workspaceRepository.findWorkspaceByName(workSpaceName);
         Map map = mapRepository.findMapByMapNameAndAndWorkspace(layerName,workspace);
         if(map.getNotes() != null){
             for(Note note : map.getNotes()){
@@ -216,7 +223,7 @@ public class ManageServiceImpl implements ManageService {
         if (extension.equals("tif") || extension.equals("tiff")) {
             mapType = "GeoTIFF";
         } else if (extension.equals("jpg") || extension.equals("jpeg")) {
-            mapType = "WorldImage";  // GeoServer can handle JPG files using ImageMosaic plugin
+            mapType = "WorldImage";
         }else if(extension.equals("ecw")){
             mapType = "ECW";
         }
@@ -272,7 +279,7 @@ public class ManageServiceImpl implements ManageService {
             addCoverage(workspaceName, layerName, coverageJson);
             // http://localhost:8080/geoserver/tiger/wms?service=WMS&version=1.1.0&request=GetMap&layers=tiger%3Atiger_roads&bbox=-74.02722%2C40.684221%2C-73.907005%2C40.878178&width=476&height=768&srs=EPSG%3A4326&styles=&format=application/openlayers
             String displayUrl = getDisplayUrl(workspaceName,layerName,layerName);
-            var workspace = workspaceRepository.findWorkspaceByName(workspaceName).orElseThrow();
+            var workspace = workspaceRepository.findWorkspaceByName(workspaceName);
             Map map = Map.builder().id(Util.generateUUID()).mapName(layerName)
                     .fileUrl(localFilePath).mapType(mapType).mapDescription(description).workspace(workspace).displayUrl(displayUrl).build();
             mapRepository.save(map);
@@ -281,7 +288,65 @@ public class ManageServiceImpl implements ManageService {
         }
     }
 
-   private String getDisplayUrl(String workspaceName, String coverageStoreName, String layerName) {
+    @Override
+    public String createLayerGroup(LayerGroupRequest layerGroupRequest) throws Exception {
+        String layerGroupJson = buildLayerGroupJson(layerGroupRequest);
+        String url = geoserverUrl + "/layergroups";
+
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> request = new HttpEntity<>(layerGroupJson, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url,  request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.CREATED) {
+            List<Map> layers = new ArrayList<>();
+            LayerGroup layerGroup = LayerGroup.builder().id(Util.generateUUID()).name(layerGroupRequest.getName())
+                    .title(layerGroupRequest.getTitle()).abstractText(layerGroupRequest.getAbstractText())
+                    .mode(layerGroupRequest.getMode()).workspace(workspaceRepository.findWorkspaceByName(layerGroupRequest.getWorkspace()))
+                    .build();
+            for(String layerName : layerGroupRequest.getLayers()){
+                Map layer = mapRepository.findMapByMapName(layerName);
+                layers.add(layer);
+            }
+            layerGroup.setLayers(layers);
+            return "Layer group created successfully!";
+        } else {
+            return "Failed to create layer group: " + response.getBody();
+        }
+    }
+
+    private String buildLayerGroupJson(LayerGroupRequest layerGroupRequest) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode rootNode = mapper.createObjectNode();
+
+        rootNode.put("name", layerGroupRequest.getName());
+        rootNode.put("mode", layerGroupRequest.getMode().toString());
+        rootNode.put("title", layerGroupRequest.getTitle());
+        rootNode.put("abstractTxt", layerGroupRequest.getAbstractText());
+
+        if (layerGroupRequest.getWorkspace() != null && !layerGroupRequest.getWorkspace().isEmpty()) {
+            if(workspaceRepository.findWorkspaceByName(layerGroupRequest.getWorkspace()) == null){
+                postWorkspace(layerGroupRequest.getWorkspace());
+            }
+            ObjectNode workspaceNode = rootNode.putObject("workspace");
+            workspaceNode.put("name", layerGroupRequest.getWorkspace());
+        }
+
+        ArrayNode publishedArray = rootNode.putObject("publishables").putArray("published");
+        for (int i = 0; i < layerGroupRequest.getLayers().size(); i++) {
+            if(mapRepository.findMapByMapName(layerGroupRequest.getLayers().get(i)) == null){
+                throw new Exception("Layer does not exist");
+            }
+            ObjectNode layerNode = publishedArray.addObject();
+            layerNode.put("name", layerGroupRequest.getLayers().get(i));
+        }
+        String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+        return jsonString;
+    }
+
+
+    private String getDisplayUrl(String workspaceName, String coverageStoreName, String layerName) {
     String url = "http://localhost:8080/geoserver/rest/workspaces/" + workspaceName + "/coveragestores/" + coverageStoreName
             + "/coverages/" + layerName + ".json";
     HttpClient client = HttpClient.newHttpClient();

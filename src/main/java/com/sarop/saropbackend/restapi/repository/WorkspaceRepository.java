@@ -9,5 +9,5 @@ public interface WorkspaceRepository extends JpaRepository<Workspace,String> {
 
     void deleteByName(String workspaceName);
 
-    Optional<Workspace> findWorkspaceByName(String name);
+    Workspace findWorkspaceByName(String name);
 }

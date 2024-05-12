@@ -1,5 +1,6 @@
 package com.sarop.saropbackend.restapi.controller;
 
+import com.sarop.saropbackend.restapi.dto.LayerGroupRequest;
 import com.sarop.saropbackend.restapi.dto.WorkspaceRequest;
 import com.sarop.saropbackend.restapi.service.ManageService;
 
@@ -67,6 +68,12 @@ public class ManageController {
         manageService.postCoverageStore(workspaceName,layerName,mapDescription,file);
         return ResponseEntity.ok().build();
 
+    }
+
+    @PostMapping("/layerGroup")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<?> postLayerGroup(@RequestBody LayerGroupRequest layerGroupRequest) throws Exception {
+        return ResponseEntity.ok(manageService.createLayerGroup(layerGroupRequest));
     }
 
 
