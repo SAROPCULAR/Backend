@@ -1,6 +1,7 @@
 package com.sarop.saropbackend.category.controller;
 
 
+import com.sarop.saropbackend.category.dto.CategorySaveRequest;
 import com.sarop.saropbackend.category.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +27,8 @@ public class CategoryController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ADMIN','OPERATION_ADMIN')")
-    public ResponseEntity<?> addCategory(@RequestBody String name){
-        return ResponseEntity.ok(categoryService.addCategory(name));
+    public ResponseEntity<?> addCategory(@RequestBody CategorySaveRequest categorySaveRequest){
+        return ResponseEntity.ok(categoryService.addCategory(categorySaveRequest.getName()));
     }
 
     @PutMapping("/{id}")
