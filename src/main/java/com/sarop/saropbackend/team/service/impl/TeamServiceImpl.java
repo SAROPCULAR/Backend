@@ -127,27 +127,32 @@ public class TeamServiceImpl implements TeamService {
         }
 
         List<User> membersToSave = new ArrayList<>();
-
-        // Add users to the team
-        for (String email : teamSaveRequest.getUsers()) {
-            User user = userRepository.findByEmail(email).orElseThrow();
-            team.getMembers().add(user);
-            user.setTeam(team);
-            membersToSave.add(user);
+        if(teamSaveRequest.getUsers() != null){
+            for (String email : teamSaveRequest.getUsers()) {
+                User user = userRepository.findByEmail(email).orElseThrow();
+                team.getMembers().add(user);
+                user.setTeam(team);
+                membersToSave.add(user);
+            }
         }
+        // Add users to the team
+
 
         // Save the team members
         userRepository.saveAll(membersToSave);
-
-        // Add team locations
-        for (String id : teamSaveRequest.getTeamLocations()) {
-            TeamLocation teamLocation = teamLocationRepository.findById(id).orElseThrow();
-            teamLocation.setTeam(team);
-            team.getTeamLocations().add(teamLocation);
+        if(teamSaveRequest.getTeamLocations() != null){
+            for (String id : teamSaveRequest.getTeamLocations()) {
+                TeamLocation teamLocation = teamLocationRepository.findById(id).orElseThrow();
+                teamLocation.setTeam(team);
+                team.getTeamLocations().add(teamLocation);
+            }
+            teamLocationRepository.saveAll(team.getTeamLocations());
         }
+        // Add team locations
+
 
         // Save the team locations
-        teamLocationRepository.saveAll(team.getTeamLocations());
+
 
 
         return team;

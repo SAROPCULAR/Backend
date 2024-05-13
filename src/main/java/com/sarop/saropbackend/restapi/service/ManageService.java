@@ -1,5 +1,6 @@
 package com.sarop.saropbackend.restapi.service;
 
+import com.sarop.saropbackend.restapi.dto.LayerGroupRequest;
 import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.entity.Workspace;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,4 +20,6 @@ public interface ManageService {
 
 
     void postCoverageStore(String workspaceName, String layerName, String mapDescription, MultipartFile file);
+
+    //String createLayerGroup(LayerGroupRequest layerGroupRequest) throws Exception;
 }
