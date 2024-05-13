@@ -110,13 +110,15 @@ public class OperationServiceImpl implements OperationService {
             category.getOperations().add(operation);
         }
 
-
-        for (String mapId : operationSaveRequest.getMaps()) {
-            Map map = mapRepository.findById(mapId).orElseThrow();
-            if (map != null) { // Check if map is found
-                operation.getMaps().add(map);
-                map.getOperations().add(operation); // Add operation to the map's list of operations
+        if(operationSaveRequest.getMaps() != null){
+            for (String mapId : operationSaveRequest.getMaps()) {
+                Map map = mapRepository.findById(mapId).orElseThrow();
+                if (map != null) { // Check if map is found
+                    operation.getMaps().add(map);
+                    map.getOperations().add(operation); // Add operation to the map's list of operations
+                }
             }
+
         }
 
         return operationRepository.save(operation);

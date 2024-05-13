@@ -69,13 +69,13 @@ public class ManageController {
         return ResponseEntity.ok().build();
 
     }
-
+    /*
     @PostMapping("/layerGroup")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<?> postLayerGroup(@RequestBody LayerGroupRequest layerGroupRequest) throws Exception {
         return ResponseEntity.ok(manageService.createLayerGroup(layerGroupRequest));
     }
-
+    */
 
 
 

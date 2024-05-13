@@ -287,7 +287,7 @@ public class ManageServiceImpl implements ManageService {
             e.printStackTrace();
         }
     }
-
+    /*
     @Override
     public String createLayerGroup(LayerGroupRequest layerGroupRequest) throws Exception {
         String layerGroupJson = buildLayerGroupJson(layerGroupRequest);
@@ -344,7 +344,7 @@ public class ManageServiceImpl implements ManageService {
         String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
         return jsonString;
     }
-
+    */
 
     private String getDisplayUrl(String workspaceName, String coverageStoreName, String layerName) {
     String url = "http://localhost:8080/geoserver/rest/workspaces/" + workspaceName + "/coveragestores/" + coverageStoreName

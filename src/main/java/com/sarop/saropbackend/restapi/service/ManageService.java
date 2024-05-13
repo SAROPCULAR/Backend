@@ -21,5 +21,5 @@ public interface ManageService {
 
     void postCoverageStore(String workspaceName, String layerName, String mapDescription, MultipartFile file);
 
-    String createLayerGroup(LayerGroupRequest layerGroupRequest) throws Exception;
+    //String createLayerGroup(LayerGroupRequest layerGroupRequest) throws Exception;
 }
