@@ -114,7 +114,7 @@ public class ManageServiceImpl implements ManageService {
                 String.class);
 
 
-        Workspace workspace = Workspace.builder().id(Util.generateUUID()).name(workspaceName).build();
+        Workspace workspace = Workspace.builder().id(Util.generateUUID()).name(workspaceName).maps(new ArrayList<>()).build();
         workspaceRepository.save(workspace);
 
     }
@@ -283,68 +283,13 @@ public class ManageServiceImpl implements ManageService {
             Map map = Map.builder().id(Util.generateUUID()).mapName(layerName)
                     .fileUrl(localFilePath).mapType(mapType).mapDescription(description).workspace(workspace).displayUrl(displayUrl).build();
             mapRepository.save(map);
+            workspace.getMaps().add(map);
+            workspaceRepository.save(workspace);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    /*
-    @Override
-    public String createLayerGroup(LayerGroupRequest layerGroupRequest) throws Exception {
-        String layerGroupJson = buildLayerGroupJson(layerGroupRequest);
-        String url = geoserverUrl + "/layergroups";
 
-
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> request = new HttpEntity<>(layerGroupJson, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url,  request, String.class);
-
-        if (response.getStatusCode() == HttpStatus.CREATED) {
-            List<Map> layers = new ArrayList<>();
-            LayerGroup layerGroup = LayerGroup.builder().id(Util.generateUUID()).name(layerGroupRequest.getName())
-                    .title(layerGroupRequest.getTitle()).abstractText(layerGroupRequest.getAbstractText())
-                    .mode(layerGroupRequest.getMode()).workspace(workspaceRepository.findWorkspaceByName(layerGroupRequest.getWorkspace()))
-                    .build();
-            for(String layerName : layerGroupRequest.getLayers()){
-                Map layer = mapRepository.findMapByMapName(layerName);
-                layers.add(layer);
-            }
-            layerGroup.setLayers(layers);
-            return "Layer group created successfully!";
-        } else {
-            return "Failed to create layer group: " + response.getBody();
-        }
-    }
-
-    private String buildLayerGroupJson(LayerGroupRequest layerGroupRequest) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode rootNode = mapper.createObjectNode();
-
-        rootNode.put("name", layerGroupRequest.getName());
-        rootNode.put("mode", layerGroupRequest.getMode().toString());
-        rootNode.put("title", layerGroupRequest.getTitle());
-        rootNode.put("abstractTxt", layerGroupRequest.getAbstractText());
-
-        if (layerGroupRequest.getWorkspace() != null && !layerGroupRequest.getWorkspace().isEmpty()) {
-            if(workspaceRepository.findWorkspaceByName(layerGroupRequest.getWorkspace()) == null){
-                postWorkspace(layerGroupRequest.getWorkspace());
-            }
-            ObjectNode workspaceNode = rootNode.putObject("workspace");
-            workspaceNode.put("name", layerGroupRequest.getWorkspace());
-        }
-
-        ArrayNode publishedArray = rootNode.putObject("publishables").putArray("published");
-        for (int i = 0; i < layerGroupRequest.getLayers().size(); i++) {
-            if(mapRepository.findMapByMapName(layerGroupRequest.getLayers().get(i)) == null){
-                throw new Exception("Layer does not exist");
-            }
-            ObjectNode layerNode = publishedArray.addObject();
-            layerNode.put("name", layerGroupRequest.getLayers().get(i));
-        }
-        String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
-        return jsonString;
-    }
-    */
 
     private String getDisplayUrl(String workspaceName, String coverageStoreName, String layerName) {
     String url = "http://localhost:8080/geoserver/rest/workspaces/" + workspaceName + "/coveragestores/" + coverageStoreName
@@ -409,5 +354,63 @@ public class ManageServiceImpl implements ManageService {
 
         }
     }
+    /*
+    @Override
+    public String createLayerGroup(LayerGroupRequest layerGroupRequest) throws Exception {
+        String layerGroupJson = buildLayerGroupJson(layerGroupRequest);
+        String url = geoserverUrl + "/layergroups";
+
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> request = new HttpEntity<>(layerGroupJson, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url,  request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.CREATED) {
+            List<Map> layers = new ArrayList<>();
+            LayerGroup layerGroup = LayerGroup.builder().id(Util.generateUUID()).name(layerGroupRequest.getName())
+                    .title(layerGroupRequest.getTitle()).abstractText(layerGroupRequest.getAbstractText())
+                    .mode(layerGroupRequest.getMode()).workspace(workspaceRepository.findWorkspaceByName(layerGroupRequest.getWorkspace()))
+                    .build();
+            for(String layerName : layerGroupRequest.getLayers()){
+                Map layer = mapRepository.findMapByMapName(layerName);
+                layers.add(layer);
+            }
+            layerGroup.setLayers(layers);
+            return "Layer group created successfully!";
+        } else {
+            return "Failed to create layer group: " + response.getBody();
+        }
+    }
+
+    private String buildLayerGroupJson(LayerGroupRequest layerGroupRequest) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode rootNode = mapper.createObjectNode();
+
+        rootNode.put("name", layerGroupRequest.getName());
+        rootNode.put("mode", layerGroupRequest.getMode().toString());
+        rootNode.put("title", layerGroupRequest.getTitle());
+        rootNode.put("abstractTxt", layerGroupRequest.getAbstractText());
+
+        if (layerGroupRequest.getWorkspace() != null && !layerGroupRequest.getWorkspace().isEmpty()) {
+            if(workspaceRepository.findWorkspaceByName(layerGroupRequest.getWorkspace()) == null){
+                postWorkspace(layerGroupRequest.getWorkspace());
+            }
+            ObjectNode workspaceNode = rootNode.putObject("workspace");
+            workspaceNode.put("name", layerGroupRequest.getWorkspace());
+        }
+
+        ArrayNode publishedArray = rootNode.putObject("publishables").putArray("published");
+        for (int i = 0; i < layerGroupRequest.getLayers().size(); i++) {
+            if(mapRepository.findMapByMapName(layerGroupRequest.getLayers().get(i)) == null){
+                throw new Exception("Layer does not exist");
+            }
+            ObjectNode layerNode = publishedArray.addObject();
+            layerNode.put("name", layerGroupRequest.getLayers().get(i));
+        }
+        String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+        return jsonString;
+    }
+    */
 
     }
