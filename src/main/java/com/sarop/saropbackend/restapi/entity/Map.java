@@ -25,17 +25,17 @@ public class Map {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(nullable=false)
+    @Column(nullable=false,length= 1000)
     private String mapName;
-    @Column(nullable=false)
+    @Column(nullable=false,length= 1000)
     private String mapType;
-    @Column(nullable=false)
+    @Column(nullable=false,length= 1000)
     private String fileUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length= 1000)
     private String mapDescription;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length= 1000)
     private String displayUrl;
 
     @ManyToOne()
