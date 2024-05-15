@@ -6,6 +6,7 @@ import com.sarop.saropbackend.note.dto.NoteAddRequest;
 import com.sarop.saropbackend.note.model.Note;
 import com.sarop.saropbackend.note.repository.NoteRepository;
 import com.sarop.saropbackend.note.service.NoteService;
+import com.sarop.saropbackend.operation.model.Operation;
 import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.repository.MapRepository;
 import com.sarop.saropbackend.user.model.User;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
