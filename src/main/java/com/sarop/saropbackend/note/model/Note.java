@@ -32,10 +32,10 @@ public class Note {
     private String comment;
 
     @OneToOne
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="coordinate_id",nullable = false)
     private Coordinate coordinate;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name="map_id",nullable = false)
     private Map map;
 }
