@@ -170,35 +170,47 @@ public class TeamServiceImpl implements TeamService {
         team.setProvinceCode(teamUpdateRequest.getProvinceCode());
         team.setProvinceName(teamUpdateRequest.getProvinceName());
         team.setPhoneDescription(teamUpdateRequest.getPhoneDescription());
-
-        User teamLeader = userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).orElseThrow();
-        if (!teamLeader.equals(team.getTeamLeader())) {
-            team.getTeamLeader().setRole(Role.USER);
-            teamLeader.setRole(Role.OPERATION_ADMIN);
-            team.setTeamLeader(teamLeader);
+        if(userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).isPresent()){
+            User teamLeader = userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).orElseThrow();
+            if (!teamLeader.equals(team.getTeamLeader())) {
+                team.getTeamLeader().setRole(Role.USER);
+                teamLeader.setRole(Role.OPERATION_ADMIN);
+                team.setTeamLeader(teamLeader);
+            }
         }
 
+        if(team.getTeamLocations() != null){
+            for(TeamLocation teamLocation: team.getTeamLocations()){
+                teamLocation.setTeam(null);
+            }
+        }
         // Update team locations
-        for(TeamLocation teamLocation: team.getTeamLocations()){
-            teamLocation.setTeam(null);
-        }
+
         team.getTeamLocations().clear();
-        for (String locationId : teamUpdateRequest.getTeamLocations()) {
-            TeamLocation teamLocation = teamLocationRepository.findById(locationId).orElseThrow();
-            team.getTeamLocations().add(teamLocation);
-            teamLocation.setTeam(team);
+        if(teamUpdateRequest.getTeamLocations() != null){
+            for (String locationId : teamUpdateRequest.getTeamLocations()) {
+                TeamLocation teamLocation = teamLocationRepository.findById(locationId).orElseThrow();
+                team.getTeamLocations().add(teamLocation);
+                teamLocation.setTeam(team);
+            }
         }
 
-        // Update team members
-        for(User user: team.getMembers()){
-            user.setTeam(null);
+        if(team.getMembers() != null){
+            for(User user: team.getMembers()){
+                user.setTeam(null);
+            }
         }
+
         team.getMembers().clear();
-        for (String email : teamUpdateRequest.getUsers()) {
-            User user = userRepository.findByEmail(email).orElseThrow();
-            team.getMembers().add(user);
-            user.setTeam(team);
+
+        if(teamUpdateRequest.getUsers() != null){
+            for (String email : teamUpdateRequest.getUsers()) {
+                User user = userRepository.findByEmail(email).orElseThrow();
+                team.getMembers().add(user);
+                user.setTeam(team);
+            }
         }
+
 
         // Save the updated team with all its relationships
         team = teamRepository.save(team);

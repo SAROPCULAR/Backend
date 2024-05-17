@@ -127,8 +127,8 @@ public class OperationServiceImpl implements OperationService {
 
     @Override
     public Operation updateOperation(String id, OperationSaveRequest operationUpdateRequest) {
-        Team team = teamRepository.findById(operationUpdateRequest.getTeamId()).orElseThrow();
-        Category category = categoryRepository.findById(operationUpdateRequest.getCategoryId()).orElseThrow();
+
+
         Operation operation = operationRepository.findById(id).orElseThrow();
 
         operation.setName(operationUpdateRequest.getName());
@@ -136,15 +136,18 @@ public class OperationServiceImpl implements OperationService {
         operation.setOperationDate(operationUpdateRequest.getOperationDate());
         // Retrieve maps for the operation
         List<Map> maps = new ArrayList<>();
-        for (String mapId : operationUpdateRequest.getMaps()) {
-            Map map = mapRepository.findById(mapId).orElseThrow();
-            if (map != null) {
-                maps.add(map);
-                if(!map.getOperations().contains(operation)){
-                    map.getOperations().add(operation);
+        if(operationUpdateRequest.getMaps() != null){
+            for (String mapId : operationUpdateRequest.getMaps()) {
+                Map map = mapRepository.findById(mapId).orElseThrow();
+                if (map != null) {
+                    maps.add(map);
+                    if(!map.getOperations().contains(operation)){
+                        map.getOperations().add(operation);
+                    }
                 }
             }
         }
+
         if(operation.getMaps() != null){
             for(Map map : operation.getMaps()){
                 if(!maps.contains(map)){
@@ -152,25 +155,31 @@ public class OperationServiceImpl implements OperationService {
                 }
             }
         }
-
-        if(operation.getCategory() != null){
-            if(!operation.getCategory().equals(category)){
-                Category oldCategory = operation.getCategory();
+        if(categoryRepository.findById(operationUpdateRequest.getCategoryId()).isPresent()){
+            Category category = categoryRepository.findById(operationUpdateRequest.getCategoryId()).orElseThrow();
+            if(operation.getCategory() != null){
+                if(!operation.getCategory().equals(category)){
+                    Category oldCategory = operation.getCategory();
+                    operation.setCategory(category);
+                    oldCategory.getOperations().remove(operation);
+                }
+            }else{
                 operation.setCategory(category);
-                oldCategory.getOperations().remove(operation);
             }
-        }else{
-            operation.setCategory(category);
         }
 
-        if(operation.getTeam() != null){
-            if(!operation.getTeam().equals(team)){
-                Team oldTeam = operation.getTeam();
+        if(teamRepository.findById(operationUpdateRequest.getTeamId()).isPresent()){
+            Team team = teamRepository.findById(operationUpdateRequest.getTeamId()).orElseThrow();
+            if(operation.getTeam() != null){
+                if(!operation.getTeam().equals(team)){
+                    Team oldTeam = operation.getTeam();
+                    operation.setTeam(team);
+                    oldTeam.getOperations().remove(operation);
+                }
+            }else{
                 operation.setTeam(team);
-                oldTeam.getOperations().remove(operation);
             }
-        }else{
-            operation.setTeam(team);
+
         }
 
         // Update the maps associated with the operation
