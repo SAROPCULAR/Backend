@@ -76,15 +76,21 @@ public class AdminServiceImpl implements AdminService {
         if(user.getEmail() != userUpdateRequest.getEmail()){
             user.setEmail(userUpdateRequest.getEmail());
         }
-        user.setPassword(passwordEncoder.encode(userUpdateRequest.getPassword()));
+        if(!userUpdateRequest.getPassword().isEmpty()){
+            user.setPassword(passwordEncoder.encode(userUpdateRequest.getPassword()));
+        }
         if(teamRepository.findById(userUpdateRequest.getTeamId()).isPresent()){
             Team team = teamRepository.findById(userUpdateRequest.getTeamId()).orElseThrow();
-            if(team.getTeamLeader().equals(user)){
-                team.setTeamLeader(null);
-                user.setRole(Role.USER);
+            if(team.getTeamLeader() != null){
+                if(team.getTeamLeader().equals(user)){
+                    team.setTeamLeader(null);
+                    user.setRole(Role.USER);
+                }
             }
+
             user.setTeam(team);
         }
+        user.setRole(userUpdateRequest.getRole());
 
         return userRepository.save(user);
     }
@@ -98,9 +104,12 @@ public class AdminServiceImpl implements AdminService {
         }
 
         if (user.getTeam() != null) {
-            if(user.getTeam().getTeamLeader().equals(user)){
-                user.getTeam().setTeamLeader(null);
+            if(user.getTeam().getTeamLeader() != null){
+                if(user.getTeam().getTeamLeader().equals(user)){
+                    user.getTeam().setTeamLeader(null);
+                }
             }
+
             user.getTeam().getMembers().remove(user);
         }
 
