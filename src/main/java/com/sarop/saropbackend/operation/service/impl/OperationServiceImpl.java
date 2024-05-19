@@ -4,6 +4,8 @@ import com.sarop.saropbackend.category.model.Category;
 import com.sarop.saropbackend.category.repository.CategoryRepository;
 import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.operation.dto.OperationSaveRequest;
+import com.sarop.saropbackend.operation.dto.apimodels.OperationApiModel;
+import com.sarop.saropbackend.operation.dto.apiresponse.OperationListApiResponse;
 import com.sarop.saropbackend.operation.model.Operation;
 import com.sarop.saropbackend.operation.repository.OperationRepository;
 import com.sarop.saropbackend.operation.service.OperationService;
@@ -11,8 +13,12 @@ import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.repository.MapRepository;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.team.repository.TeamRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +37,7 @@ public class OperationServiceImpl implements OperationService {
     private final CategoryRepository categoryRepository;
 
 
-    /*
+
     @PostConstruct
     public void loadDataFromAPI() {
 
@@ -79,7 +85,7 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
-     */
+
 
 
 
