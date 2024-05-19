@@ -5,6 +5,9 @@ import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.operation.model.Operation;
 import com.sarop.saropbackend.operation.repository.OperationRepository;
 import com.sarop.saropbackend.team.dto.TeamSaveRequest;
+import com.sarop.saropbackend.team.dto.apimodels.OperationalTeamApiModel;
+import com.sarop.saropbackend.team.dto.apimodels.OperationalTeamLocation;
+import com.sarop.saropbackend.team.dto.apiresponse.OperationalTeamResponse;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.team.repository.TeamRepository;
 import com.sarop.saropbackend.team.service.TeamService;
@@ -12,11 +15,16 @@ import com.sarop.saropbackend.teamLocation.model.TeamLocation;
 import com.sarop.saropbackend.teamLocation.repository.TeamLocationRepository;
 import com.sarop.saropbackend.user.model.Role;
 import com.sarop.saropbackend.user.model.User;
+import com.sarop.saropbackend.user.model.UserStatus;
 import com.sarop.saropbackend.user.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 
 import java.util.ArrayList;
@@ -38,9 +46,8 @@ public class TeamServiceImpl implements TeamService {
 
     private final OperationRepository operationRepository;
 
-    /*
+
     @PostConstruct
-    @Transactional
     public void loadDataFromApi() {
         String apiUrl = "https://portal.akut.org.tr/api/webpage/getteamlist";
         RestTemplate restTemplate = new RestTemplate();
@@ -66,6 +73,7 @@ public class TeamServiceImpl implements TeamService {
                     String password = Util.generateRandomPassword(16);
                     teamLeader.setPassword(passwordEncoder.encode(password));
                     teamLeader.setTeam(team);
+                    userRepository.save(teamLeader);
                     team.setTeamLeader(teamLeader);
 
                     System.out.println("User is saved with email: " + teamLeader.getEmail() + " and password: " + password);
@@ -89,6 +97,7 @@ public class TeamServiceImpl implements TeamService {
                         location.setFaxNumber(locationApiModel.getFaxNumber());
                         location.setTeam(team);
                         locations.add(location);
+                        teamLocationRepository.save(location);
                     }
                     team.setTeamLocations(locations);
                     teamRepository.save(team);
@@ -98,7 +107,7 @@ public class TeamServiceImpl implements TeamService {
         }
     }
 
-     */
+
 
 
     @Override
