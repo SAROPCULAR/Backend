@@ -54,8 +54,8 @@ public class Operation {
 
     @Override
     public String toString() {
-        String mapIds = maps != null ? maps.stream()
-                .map(Map::getId)
+        String mapNames = maps != null ? maps.stream()
+                .map(Map::getMapName)
                 .collect(Collectors.toList())
                 .toString()
                 : "[]";
@@ -64,9 +64,9 @@ public class Operation {
                 ", operationNumber=" + operationNumber +
                 ", operationDate='" + operationDate + '\'' +
                 ", name='" + name + '\'' +
-                ", categoryId='" + (category != null ? category.getId() : null) + '\'' +
-                ", teamId='" + (team != null ? team.getId() : null) + '\'' +
-                ", mapIds=" + mapIds +
+                ", categoryName='" + (category != null ? category.getId() : null) + '\'' +
+                ", teamName='" + (team != null ? team.getId() : null) + '\'' +
+                ", mapNames=" + mapNames +
                 '}';
     }
 }
