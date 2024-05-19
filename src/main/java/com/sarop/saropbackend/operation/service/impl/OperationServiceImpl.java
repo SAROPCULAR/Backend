@@ -37,7 +37,7 @@ public class OperationServiceImpl implements OperationService {
     private final CategoryRepository categoryRepository;
 
 
-
+    /*
     @PostConstruct
     public void loadDataFromAPI() {
 
@@ -87,7 +87,7 @@ public class OperationServiceImpl implements OperationService {
 
 
 
-
+*/
 
 
 
@@ -116,7 +116,7 @@ public class OperationServiceImpl implements OperationService {
             category.getOperations().add(operation);
         }
 
-        if(operationSaveRequest.getMaps() != null){
+        if(!operationSaveRequest.getMaps().isEmpty()){
             for (String mapId : operationSaveRequest.getMaps()) {
                 Map map = mapRepository.findById(mapId).orElseThrow();
                 if (map != null) { // Check if map is found
@@ -140,9 +140,9 @@ public class OperationServiceImpl implements OperationService {
         operation.setName(operationUpdateRequest.getName());
         operation.setOperationNumber(operationUpdateRequest.getOperationNumber());
         operation.setOperationDate(operationUpdateRequest.getOperationDate());
-        // Retrieve maps for the operation
         List<Map> maps = new ArrayList<>();
-        if(operationUpdateRequest.getMaps() != null){
+        if(!operationUpdateRequest.getMaps().isEmpty()){
+            operation.getMaps().clear(); // Clear existing maps
             for (String mapId : operationUpdateRequest.getMaps()) {
                 Map map = mapRepository.findById(mapId).orElseThrow();
                 if (map != null) {
@@ -152,6 +152,7 @@ public class OperationServiceImpl implements OperationService {
                     }
                 }
             }
+            operation.getMaps().addAll(maps); // Add updated maps
         }
 
         if(operation.getMaps() != null){
@@ -189,8 +190,7 @@ public class OperationServiceImpl implements OperationService {
         }
 
         // Update the maps associated with the operation
-        operation.getMaps().clear(); // Clear existing maps
-        operation.getMaps().addAll(maps); // Add updated maps
+
 
         return operationRepository.save(operation);
     }

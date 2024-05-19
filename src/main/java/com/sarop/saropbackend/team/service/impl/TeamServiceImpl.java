@@ -46,7 +46,7 @@ public class TeamServiceImpl implements TeamService {
 
     private final OperationRepository operationRepository;
 
-
+/*
     @PostConstruct
     public void loadDataFromApi() {
         String apiUrl = "https://portal.akut.org.tr/api/webpage/getteamlist";
@@ -107,7 +107,7 @@ public class TeamServiceImpl implements TeamService {
         }
     }
 
-
+*/
 
 
     @Override
