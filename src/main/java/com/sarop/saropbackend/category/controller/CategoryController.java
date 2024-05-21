@@ -33,8 +33,8 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN','OPERATION_ADMIN')")
-    public ResponseEntity<?> updateCategory(@PathVariable String id,@RequestBody String name){
-        return ResponseEntity.ok(categoryService.updateCategory(id,name));
+    public ResponseEntity<?> updateCategory(@PathVariable String id,@RequestBody CategorySaveRequest categorySaveRequest){
+        return ResponseEntity.ok(categoryService.updateCategory(id,categorySaveRequest.getName()));
     }
 
     @DeleteMapping("/{id}")
