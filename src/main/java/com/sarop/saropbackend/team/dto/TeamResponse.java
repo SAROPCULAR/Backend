@@ -1,9 +1,6 @@
 package com.sarop.saropbackend.team.dto;
 
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,8 +13,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamSaveRequest {
+public class TeamResponse {
 
+    private String id;
 
     private String name;
 
@@ -31,8 +29,8 @@ public class TeamSaveRequest {
     private String provinceName;
 
 
-    @Email
-    private String teamLeaderEmail;
+
+    private TeamUserResponse teamLeader;
 
 
 
@@ -41,9 +39,7 @@ public class TeamSaveRequest {
 
 
 
-    private List<String> teamLocations;
+    private List<TeamTeamLocationResponse> teamLocations;
 
-
-    private List<String> users;
-
+    private List<TeamUserResponse> users;
 }

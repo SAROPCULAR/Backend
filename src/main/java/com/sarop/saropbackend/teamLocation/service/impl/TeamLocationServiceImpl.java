@@ -4,7 +4,9 @@ package com.sarop.saropbackend.teamLocation.service.impl;
 import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.team.repository.TeamRepository;
+import com.sarop.saropbackend.teamLocation.dto.TeamLocationResponse;
 import com.sarop.saropbackend.teamLocation.dto.TeamLocationSaveRequest;
+import com.sarop.saropbackend.teamLocation.dto.TeamLocationTeamResponse;
 import com.sarop.saropbackend.teamLocation.model.TeamLocation;
 import com.sarop.saropbackend.teamLocation.repository.TeamLocationRepository;
 import com.sarop.saropbackend.teamLocation.service.TeamLocationService;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -59,9 +62,10 @@ public class TeamLocationServiceImpl implements TeamLocationService {
     }
 
     @Override
-    public List<TeamLocation> getAllTeamLocations(Optional<String> teamName, Optional<String> name,
+    public List<TeamLocationResponse> getAllTeamLocations(Optional<String> teamName, Optional<String> name,
                                                   Optional<String> provinceCode, Optional<String> provinceName,
                                                   Optional<String> countyName) {
+        List<TeamLocationResponse> teamLocationResponses = new ArrayList<>();
         List<TeamLocation> teamLocations = teamLocationRepository.findAll().stream()
                 .filter(teamLocation ->
                         (teamName.isEmpty() || teamLocation.getTeam().getName().equals(teamName.get())) &&
@@ -72,7 +76,22 @@ public class TeamLocationServiceImpl implements TeamLocationService {
                 )
                 .collect(Collectors.toList());
 
-        return teamLocations;
+        for(TeamLocation teamLocation : teamLocations){
+            var teamLocationResponse = TeamLocationResponse.builder().id(teamLocation.getId()).name(teamLocation.getName())
+                    .provinceCode(teamLocation.getProvinceCode()).provinceName(teamLocation.getProvinceName())
+                    .description(teamLocation.getDescription()).secondPhoneNumber(teamLocation.getSecondPhoneNumber())
+                    .countyName(teamLocation.getCountyName()).faxNumber(teamLocation.getFaxNumber()).latitude(teamLocation.getLatitude())
+                    .longitude(teamLocation.getLongitude()).address(teamLocation.getAddress()).phoneNumber(teamLocation.getPhoneNumber())
+                    .thirdPhoneNumber(teamLocation.getThirdPhoneNumber()).build();
+            if(teamLocation.getTeam() != null){
+                TeamLocationTeamResponse team = new TeamLocationTeamResponse();
+                team.setId(teamLocation.getTeam().getId());
+                team.setName(teamLocation.getTeam().getName());
+                teamLocationResponse.setTeam(team);
+            }
+            teamLocationResponses.add(teamLocationResponse);
+        }
+        return teamLocationResponses;
     }
 
 

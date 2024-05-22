@@ -10,13 +10,14 @@ import lombok.*;
 
 import java.util.List;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
 @Table(name="users")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class User  {
 
     @Id
@@ -37,12 +38,15 @@ public class User  {
     @Column
     private UserStatus status;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "team_id")
     private Team team;
 
     @OneToMany(fetch = FetchType.EAGER)
     private List<Note> notes;
+
+
+
 
 
 

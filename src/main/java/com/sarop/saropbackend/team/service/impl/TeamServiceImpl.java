@@ -4,7 +4,10 @@ import com.sarop.saropbackend.common.Util;
 
 import com.sarop.saropbackend.operation.model.Operation;
 import com.sarop.saropbackend.operation.repository.OperationRepository;
+import com.sarop.saropbackend.team.dto.TeamResponse;
 import com.sarop.saropbackend.team.dto.TeamSaveRequest;
+import com.sarop.saropbackend.team.dto.TeamTeamLocationResponse;
+import com.sarop.saropbackend.team.dto.TeamUserResponse;
 import com.sarop.saropbackend.team.dto.apimodels.OperationalTeamApiModel;
 import com.sarop.saropbackend.team.dto.apimodels.OperationalTeamLocation;
 import com.sarop.saropbackend.team.dto.apiresponse.OperationalTeamResponse;
@@ -212,7 +215,7 @@ public class TeamServiceImpl implements TeamService {
 
         team.getMembers().clear();
 
-        if(teamUpdateRequest.getUsers() != null){
+        if(teamUpdateRequest.getUsers() != null && !teamUpdateRequest.getUsers().isEmpty()){
             for (String email : teamUpdateRequest.getUsers()) {
                 User user = userRepository.findByEmail(email).orElseThrow();
                 team.getMembers().add(user);
@@ -230,9 +233,10 @@ public class TeamServiceImpl implements TeamService {
 
 
     @Override
-    public List<Team> findAllTeams(Optional<String> name, Optional<Integer> foundationYear, Optional<String> provinceName,
+    public List<TeamResponse> findAllTeams(Optional<String> name, Optional<Integer> foundationYear, Optional<String> provinceName,
                                    Optional<String> provinceCode, Optional<String> teamLeaderName) {
 
+        List<TeamResponse> teamResponses = new ArrayList<>();
         List<Team> teams = teamRepository.findAll().stream().filter(team ->
                 (name.isEmpty() || team.getName().equals(name.get())) &&
                         (foundationYear.isEmpty() || foundationYear.get().equals(team.getFoundationYear())) &&
@@ -241,7 +245,38 @@ public class TeamServiceImpl implements TeamService {
                         (teamLeaderName.isEmpty() || team.getTeamLeader().getName().equals(teamLeaderName.get()))
         ).collect(Collectors.toList());
 
-        return teams;
+        for(Team team : teams){
+            var teamResponse = TeamResponse.builder().id(team.getId()).name(team.getName())
+                    .foundationYear(team.getFoundationYear()).provinceCode(team.getProvinceCode())
+                    .provinceName(team.getProvinceName()).phoneDescription(team.getPhoneDescription())
+                    .teamLocations(new ArrayList<>())
+                    .users(new ArrayList<>()).build();
+            if(team.getTeamLeader() != null){
+                TeamUserResponse teamLeader = new TeamUserResponse();
+                teamLeader.setId(team.getTeamLeader().getId());
+                teamLeader.setEmail(team.getTeamLeader().getEmail());
+                teamResponse.setTeamLeader(teamLeader);
+            }
+            if(team.getTeamLocations() != null && !team.getTeamLocations().isEmpty()){
+                for(TeamLocation teamLocation : team.getTeamLocations()){
+                    TeamTeamLocationResponse teamTeamLocationResponse = new TeamTeamLocationResponse();
+                    teamTeamLocationResponse.setId(teamLocation.getId());
+                    teamTeamLocationResponse.setName(teamLocation.getName());
+                    teamResponse.getTeamLocations().add(teamTeamLocationResponse);
+                }
+            }
+            if(team.getMembers() != null  && !team.getMembers().isEmpty()){
+                for(User user: team.getMembers()){
+                    TeamUserResponse teamUserResponse = new TeamUserResponse();
+                    teamUserResponse.setId(user.getId());
+                    teamUserResponse.setEmail(user.getEmail());
+                    teamResponse.getUsers().add(teamUserResponse);
+                }
+            }
+            teamResponses.add(teamResponse);
+        }
+
+        return teamResponses;
     }
 
 

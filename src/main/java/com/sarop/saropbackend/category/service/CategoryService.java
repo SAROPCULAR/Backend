@@ -1,5 +1,6 @@
 package com.sarop.saropbackend.category.service;
 
+import com.sarop.saropbackend.category.dto.CategoryResponse;
 import com.sarop.saropbackend.category.model.Category;
 
 import java.io.UnsupportedEncodingException;
@@ -12,7 +13,7 @@ public interface CategoryService {
 
     Category updateCategory(String id, String name);
 
-    List<Category> getAllCategories();
+    List<CategoryResponse> getAllCategories();
 
     void deleteCategory(String id);
 }

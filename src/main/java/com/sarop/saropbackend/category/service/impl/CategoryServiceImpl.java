@@ -1,5 +1,6 @@
 package com.sarop.saropbackend.category.service.impl;
 
+import com.sarop.saropbackend.category.dto.CategoryResponse;
 import com.sarop.saropbackend.category.model.Category;
 import com.sarop.saropbackend.category.repository.CategoryRepository;
 import com.sarop.saropbackend.category.service.CategoryService;
@@ -34,8 +35,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<Category> getAllCategories(){
-        return categoryRepository.findAll();
+    public List<CategoryResponse> getAllCategories(){
+        List<CategoryResponse> categoryResponses = new ArrayList<>();
+        List<Category> categories = categoryRepository.findAll();
+        for(Category category : categories){
+            CategoryResponse categoryResponse = new CategoryResponse();
+            categoryResponse.setId(category.getId());
+            categoryResponse.setName(category.getName());
+            categoryResponses.add(categoryResponse);
+        }
+        return categoryResponses;
     }
 
 

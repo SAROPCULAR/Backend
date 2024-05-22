@@ -1,5 +1,6 @@
 package com.sarop.saropbackend.team.service;
 
+import com.sarop.saropbackend.team.dto.TeamResponse;
 import com.sarop.saropbackend.team.dto.TeamSaveRequest;
 import com.sarop.saropbackend.team.model.Team;
 
@@ -12,8 +13,8 @@ public interface TeamService {
 
     Team updateTeam(String id,TeamSaveRequest teamUpdateRequest);
 
-    List<Team> findAllTeams(Optional<String> name, Optional<Integer> foundationYear, Optional<String> provinceName,
-                            Optional<String> provinceCode, Optional<String> teamLeaderName);
+    List<TeamResponse> findAllTeams(Optional<String> name, Optional<Integer> foundationYear, Optional<String> provinceName,
+                                    Optional<String> provinceCode, Optional<String> teamLeaderName);
 
     void deleteTeam(String id);
 
