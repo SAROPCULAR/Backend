@@ -4,9 +4,12 @@ import com.sarop.saropbackend.common.Coordinate;
 import com.sarop.saropbackend.common.CoordinateRepository;
 import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.polygon.dto.PolygonAddRequest;
+import com.sarop.saropbackend.polygon.dto.PolygonMapResponse;
+import com.sarop.saropbackend.polygon.dto.PolygonResponse;
 import com.sarop.saropbackend.polygon.model.Polygon;
 import com.sarop.saropbackend.polygon.repository.PolygonRepository;
 import com.sarop.saropbackend.polygon.service.PolygonService;
+import com.sarop.saropbackend.restapi.dto.Responses.CoordinateResponse;
 import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.repository.MapRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,8 +48,30 @@ public class PolygonServiceImpl implements PolygonService {
     }
 
     @Override
-    public List<Polygon> getAllPolygonsByMapId(String id) {
-        return polygonRepository.getPolygonsByMap_Id(id);
+        public List<PolygonResponse> getAllPolygonsByMapId(String id) {
+        List<PolygonResponse> polygonResponses = new ArrayList<>();
+        List<Polygon> polygonList =  polygonRepository.getPolygonsByMap_Id(id);
+        if(polygonList != null){
+            for(Polygon polygon : polygonList) {
+                PolygonResponse polygonResponse = new PolygonResponse();
+                polygonResponse.setId(polygon.getId());
+                polygonResponse.setCoordinates(new ArrayList<>());
+                for (Coordinate coordinate : polygon.getCoordinates()) {
+                    CoordinateResponse coordinateResponse = new CoordinateResponse();
+                    coordinateResponse.setId(coordinate.getId());
+                    coordinateResponse.setX(coordinate.getX());
+                    coordinateResponse.setY(coordinate.getY());
+                    polygonResponse.getCoordinates().add(coordinateResponse);
+                }
+                PolygonMapResponse polygonMapResponse = new PolygonMapResponse();
+                polygonMapResponse.setId(polygon.getMap().getId());
+                polygonMapResponse.setMapName(polygon.getMap().getMapName());
+                polygonMapResponse.setWorkspaceName(polygon.getMap().getWorkspace().getName());
+                polygonResponse.setMap(polygonMapResponse);
+                polygonResponses.add(polygonResponse);
+            }
+        }
+        return polygonResponses;
     }
 
     @Override

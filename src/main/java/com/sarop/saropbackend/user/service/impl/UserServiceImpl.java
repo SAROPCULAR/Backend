@@ -1,16 +1,16 @@
 package com.sarop.saropbackend.user.service.impl;
 
-import com.sarop.saropbackend.user.dto.ChangePasswordRequest;
+import com.sarop.saropbackend.user.dto.responses.UserResponse;
+import com.sarop.saropbackend.user.dto.responses.UserTeamResponse;
 import com.sarop.saropbackend.user.model.User;
 import com.sarop.saropbackend.user.model.UserStatus;
 import com.sarop.saropbackend.user.repository.UserRepository;
 import com.sarop.saropbackend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,7 +45,8 @@ public class UserServiceImpl implements UserService {
 
      */
 
-    public List<User> findAllUser(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName) {
+    public List<UserResponse> findAllUser(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName) {
+        List<UserResponse> userResponses = new ArrayList<>();
         List<User> users = repository.findAll().stream()
                 .filter(user ->
                         (email.isEmpty() || user.getEmail().equals(email.get())) &&
@@ -55,7 +56,20 @@ public class UserServiceImpl implements UserService {
                                 user.getStatus() == UserStatus.VERIFIED
                 )
                 .collect(Collectors.toList());
-        return users;
+        for(User user : users){
+            if(user.getTeam() != null){
+                var userTeamResponse = UserTeamResponse.builder().id(user.getTeam().getId()).name(user.getTeam().getName()).build();
+                var userResponse = UserResponse.builder().id(user.getId()).name(user.getName()).team(userTeamResponse).email(user.getEmail()).role(user.getRole()).build();
+                userResponses.add(userResponse);
+            }else{
+                var userResponse = UserResponse.builder().id(user.getId()).name(user.getName())
+                       .email(user.getEmail()).role(user.getRole()).build();
+                userResponses.add(userResponse);
+            }
+
+
+        }
+        return userResponses;
     }
 
 

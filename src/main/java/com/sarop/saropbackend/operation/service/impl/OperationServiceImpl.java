@@ -4,8 +4,10 @@ import com.sarop.saropbackend.category.model.Category;
 import com.sarop.saropbackend.category.repository.CategoryRepository;
 import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.operation.dto.OperationSaveRequest;
-import com.sarop.saropbackend.operation.dto.apimodels.OperationApiModel;
-import com.sarop.saropbackend.operation.dto.apiresponse.OperationListApiResponse;
+import com.sarop.saropbackend.category.dto.CategoryResponse;
+import com.sarop.saropbackend.operation.dto.responses.OperationMapResponse;
+import com.sarop.saropbackend.operation.dto.responses.OperationResponse;
+import com.sarop.saropbackend.operation.dto.responses.OperationTeamResponse;
 import com.sarop.saropbackend.operation.model.Operation;
 import com.sarop.saropbackend.operation.repository.OperationRepository;
 import com.sarop.saropbackend.operation.service.OperationService;
@@ -13,12 +15,8 @@ import com.sarop.saropbackend.restapi.entity.Map;
 import com.sarop.saropbackend.restapi.repository.MapRepository;
 import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.team.repository.TeamRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -197,8 +195,9 @@ public class OperationServiceImpl implements OperationService {
 
 
     @Override
-    public List<Operation> getAllOperations(Optional<Integer> operationNumber, Optional<String> operationDate,
+    public List<OperationResponse> getAllOperations(Optional<Integer> operationNumber, Optional<String> operationDate,
                                             Optional<String> name, Optional<String> categoryName, Optional<String> teamName) {
+        List<OperationResponse> operationResponses = new ArrayList<>();
         List<Operation> operations = operationRepository.findAll().stream().filter(operation ->
                 (operationNumber.isEmpty() || operationNumber.get().equals(operation.getOperationNumber())) &&
                         (operationDate.isEmpty() || operationDate.get().equals(operation.getOperationDate())) &&
@@ -206,8 +205,36 @@ public class OperationServiceImpl implements OperationService {
                         (categoryName.isEmpty() || categoryName.get().equals(operation.getCategory().getName())) &&
                         (teamName.isEmpty() || teamName.get().equals(operation.getTeam().getName()))
         ).collect(Collectors.toList());
+        for(Operation operation : operations){
+            var operationResponse = OperationResponse.builder().id(operation.getId())
+                    .operationDate(operation.getOperationDate()).operationNumber(operation.getOperationNumber())
+                    .name(operation.getName()).maps(new ArrayList<>()).build();
+            if(operation.getCategory() != null){
+                CategoryResponse operationCategoryResponse = new CategoryResponse();
+                operationCategoryResponse.setId(operation.getCategory().getId());
+                operationCategoryResponse.setName(operation.getCategory().getName());
+                operationResponse.setCategory(operationCategoryResponse);
+            }
+            if(operation.getTeam() != null){
+                OperationTeamResponse operationTeamResponse = new OperationTeamResponse();
+                operationTeamResponse.setId(operation.getTeam().getId());
+                operationTeamResponse.setName(operation.getTeam().getName());
+                operationResponse.setTeam(operationTeamResponse);
+            }
+            if(operation.getMaps() != null && !operation.getMaps().isEmpty()){
+                for(Map map: operation.getMaps()){
+                    OperationMapResponse operationMapResponse = new OperationMapResponse();
+                    operationMapResponse.setId(map.getId());
+                    operationMapResponse.setMapName(map.getMapName());
+                    operationMapResponse.setWorkspaceName(map.getWorkspace().getName());
+                    operationResponse.getMaps().add(operationMapResponse);
+                }
+            }
+            operationResponses.add(operationResponse);
 
-        return operations;
+        }
+
+        return operationResponses;
     }
 
 

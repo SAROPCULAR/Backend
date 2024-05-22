@@ -1,5 +1,6 @@
 package com.sarop.saropbackend.teamLocation.service;
 
+import com.sarop.saropbackend.teamLocation.dto.TeamLocationResponse;
 import com.sarop.saropbackend.teamLocation.dto.TeamLocationSaveRequest;
 import com.sarop.saropbackend.teamLocation.model.TeamLocation;
 
@@ -12,9 +13,9 @@ public interface TeamLocationService {
 
     TeamLocation updateTeamLocation(String id, TeamLocationSaveRequest teamLocationUpdateRequest);
 
-    List<TeamLocation> getAllTeamLocations(Optional<String> teamName, Optional<String> name,
-                                           Optional<String> provinceCode, Optional<String> provinceName,
-                                           Optional<String> countyName);
+    List<TeamLocationResponse> getAllTeamLocations(Optional<String> teamName, Optional<String> name,
+                                                   Optional<String> provinceCode, Optional<String> provinceName,
+                                                   Optional<String> countyName);
 
     void deleteTeamLocation(String id);
 }

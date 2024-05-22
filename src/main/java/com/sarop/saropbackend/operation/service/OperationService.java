@@ -1,6 +1,7 @@
 package com.sarop.saropbackend.operation.service;
 
 import com.sarop.saropbackend.operation.dto.OperationSaveRequest;
+import com.sarop.saropbackend.operation.dto.responses.OperationResponse;
 import com.sarop.saropbackend.operation.model.Operation;
 
 import java.util.List;
@@ -12,8 +13,8 @@ public interface OperationService {
 
      Operation updateOperation(String id,OperationSaveRequest operationUpdateRequest);
 
-     List<Operation> getAllOperations(Optional<Integer> operationNumber, Optional<String> operationDate,
-                                      Optional<String> name, Optional<String> categoryName, Optional<String> teamName);
+     List<OperationResponse> getAllOperations(Optional<Integer> operationNumber, Optional<String> operationDate,
+                                              Optional<String> name, Optional<String> categoryName, Optional<String> teamName);
 
      void deleteOperation(String id);
 

@@ -4,6 +4,7 @@ package com.sarop.saropbackend.restapi.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sarop.saropbackend.common.Coordinate;
 import com.sarop.saropbackend.common.Util;
 import com.sarop.saropbackend.note.model.Note;
 import com.sarop.saropbackend.note.repository.NoteRepository;
@@ -12,6 +13,7 @@ import com.sarop.saropbackend.operation.repository.OperationRepository;
 import com.sarop.saropbackend.polygon.model.Polygon;
 import com.sarop.saropbackend.polygon.repository.PolygonRepository;
 import com.sarop.saropbackend.restapi.dto.LayerGroupRequest;
+import com.sarop.saropbackend.restapi.dto.Responses.*;
 import com.sarop.saropbackend.restapi.dto.WorkspaceRequest;
 import com.sarop.saropbackend.restapi.entity.LayerGroup;
 import com.sarop.saropbackend.restapi.entity.Map;
@@ -30,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -89,13 +92,25 @@ public class ManageServiceImpl implements ManageService {
         headers.setBasicAuth(this.username, this.password);
     }
 
-    public List<Workspace> getWorkSpaces(Optional<String> workspaceName) {
+    public List<WorkspaceResponse> getWorkSpaces(Optional<String> workspaceName) {
+        List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
         List<Workspace> workspaces = workspaceRepository.findAll().stream()
                 .filter(workspace ->
                         (workspaceName.isEmpty() || workspace.getName().equals(workspaceName.get()))
                 )
                 .collect(Collectors.toList());
-        return workspaces;
+        for(Workspace workspace : workspaces){
+            var workspaceResponse = WorkspaceResponse.builder().id(workspace.getId()).name(workspace.getName()).maps(new ArrayList<>()).build();
+            if(workspace.getMaps() != null && !workspace.getMaps().isEmpty()){
+                for(Map map : workspace.getMaps()){
+                    var mapResponse = WorkspaceMapResponse.builder().id(map.getId()).mapName(map.getMapName()).mapDescription(map.getMapDescription())
+                            .mapType(map.getMapType()).displayUrl(map.getDisplayUrl()).build();
+                    workspaceResponse.getMaps().add(mapResponse);
+                }
+            }
+            workspaceResponses.add(workspaceResponse);
+        }
+        return workspaceResponses;
     }
 
     public void postWorkspace(String workspaceName) {
@@ -131,13 +146,61 @@ public class ManageServiceImpl implements ManageService {
         workspaceRepository.deleteByName(workSpaceName);
     }
 
-    public List<Map> getLayersByWorkspaces(String workSpaceName, Optional<String> mapName) {
+    public List<MapResponse> getLayersByWorkspaces(String workSpaceName, Optional<String> mapName) {
+        List<MapResponse> mapResponses = new ArrayList<>();
         List<Map> maps = mapRepository.findAllByWorkspaceName(workSpaceName).stream()
                 .filter(map ->
                         (mapName.isEmpty() || map.getMapName().equals(mapName.get()))
                 )
                 .collect(Collectors.toList());
-        return maps;
+        for(Map map : maps){
+            MapResponse mapResponse = MapResponse.builder().id(map.getId()).mapName(map.getMapName())
+                    .mapType(map.getMapType()).mapDescription(map.getMapDescription())
+                    .displayUrl(map.getDisplayUrl()).notes(new ArrayList<>()).operations(new ArrayList<>())
+                    .polygons(new ArrayList<>()).workspace(new MapWorkspaceResponse()).build();
+            MapWorkspaceResponse mapWorkspaceResponse = new MapWorkspaceResponse();
+            mapWorkspaceResponse.setId(map.getWorkspace().getId());
+            mapWorkspaceResponse.setName(map.getWorkspace().getName());
+            mapResponse.setWorkspace(mapWorkspaceResponse);
+            if(map.getOperations() != null && !map.getOperations().isEmpty()){
+                for(Operation operation : map.getOperations()){
+                    MapOperationResponse mapOperationResponse = new MapOperationResponse();
+                    mapOperationResponse.setId(operation.getId());
+                    mapOperationResponse.setName(operation.getName());
+                }
+            }
+            if(map.getPolygons() != null && !map.getPolygons().isEmpty()){
+                for(Polygon polygon : map.getPolygons()){
+                    MapPolygonResponse mapPolygonResponse = new MapPolygonResponse();
+                    mapPolygonResponse.setId(polygon.getId());
+                    mapPolygonResponse.setCoordinates(new ArrayList<>());
+                    for(Coordinate coordinate : polygon.getCoordinates()){
+                        CoordinateResponse coordinateResponse = new CoordinateResponse();
+                        coordinateResponse.setId(coordinate.getId());
+                        coordinateResponse.setX(coordinate.getX());
+                        coordinateResponse.setY(coordinate.getY());
+                        mapPolygonResponse.getCoordinates().add(coordinateResponse);
+                    }
+                    mapResponse.getPolygons().add(mapPolygonResponse);
+                }
+            }
+            if(map.getNotes() != null && !map.getNotes().isEmpty()){
+                for(Note note: map.getNotes()){
+                    MapNoteResponse mapNoteResponse = new MapNoteResponse();
+                    mapNoteResponse.setId(note.getId());
+                    CoordinateResponse coordinateResponse = new CoordinateResponse();
+                    coordinateResponse.setId(note.getCoordinate().getId());
+                    coordinateResponse.setX(note.getCoordinate().getX());
+                    coordinateResponse.setY(note.getCoordinate().getY());
+                    mapNoteResponse.setCoordinate(coordinateResponse);
+                    mapResponse.getNotes().add(mapNoteResponse);
+                }
+
+            }
+            mapResponses.add(mapResponse);
+
+        }
+        return mapResponses;
     }
 
 

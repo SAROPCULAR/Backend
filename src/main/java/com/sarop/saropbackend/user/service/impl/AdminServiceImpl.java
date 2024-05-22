@@ -48,7 +48,7 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
-    @Transactional
+
     public User saveUser(UserSaveRequest userSaveRequest) {
 
         if(!teamRepository.findById(userSaveRequest.getTeamId()).isPresent()){
@@ -56,14 +56,19 @@ public class AdminServiceImpl implements AdminService {
                     email(userSaveRequest.getEmail()).
                     password(passwordEncoder.encode(userSaveRequest.getPassword())).
                     role(userSaveRequest.getRole()).status(UserStatus.VERIFIED).build();
-            return userRepository.save(user);
+            userRepository.save(user);
+            return user;
+
         }else{
             Team team = teamRepository.findById(userSaveRequest.getTeamId()).orElseThrow();
             var user = User.builder().name(userSaveRequest.getName()).
                     email(userSaveRequest.getEmail()).
                     password(passwordEncoder.encode(userSaveRequest.getPassword())).
                     role(userSaveRequest.getRole()).status(UserStatus.VERIFIED).team(team).build();
-            return userRepository.save(user);
+            team.getMembers().add(user);
+            userRepository.save(user);
+            teamRepository.save(team);
+            return user;
         }
 
 
