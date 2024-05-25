@@ -38,14 +38,14 @@ public class JWTService {
 
     public String generateToken(User user){
         HashMap<String,Object> claim  = new HashMap<>();
-
-
-
+        
         claim.put(TokenClaims.USER_ID.getValue(),user.getId());
         claim.put(TokenClaims.NAME.getValue(), user.getName());
         claim.put(TokenClaims.MAIL.getValue(), user.getEmail());
         claim.put(TokenClaims.ROLE_NAME.getValue(),user.getRole().name());
-
+        if(user.getTeam() != null){
+            claim.put(TokenClaims.TEAM_NAME.getValue(),user.getTeam().getName());
+        }
 
         return generateToken(claim, user);
     }

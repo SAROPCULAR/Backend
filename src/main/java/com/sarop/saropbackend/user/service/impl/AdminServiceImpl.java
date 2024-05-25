@@ -8,6 +8,8 @@ import com.sarop.saropbackend.team.model.Team;
 import com.sarop.saropbackend.team.repository.TeamRepository;
 import com.sarop.saropbackend.user.dto.UserSaveRequest;
 import com.sarop.saropbackend.user.dto.UserUpdateRequest;
+import com.sarop.saropbackend.user.dto.responses.UserResponse;
+import com.sarop.saropbackend.user.dto.responses.UserTeamResponse;
 import com.sarop.saropbackend.user.model.Role;
 import com.sarop.saropbackend.user.model.User;
 import com.sarop.saropbackend.user.model.UserStatus;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -129,7 +132,8 @@ public class AdminServiceImpl implements AdminService {
         userRepository.save(user);
     }
 
-    public List<User> findAllNotVerifiedUsers(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName){
+    public List<UserResponse> findAllNotVerifiedUsers(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName){
+        List<UserResponse> userResponses = new ArrayList<>();
         List<User> users = userRepository.findAll().stream()
                 .filter(user ->
                         ((!email.isPresent()|| user.getEmail().equals(email)) ||
@@ -139,7 +143,17 @@ public class AdminServiceImpl implements AdminService {
                                 && (user.getStatus() == UserStatus.NOT_VERIFIED)
                 )
                 .collect(Collectors.toList());
-        return users;
+        for(User user : users){
+            var userResponse = UserResponse.builder().id(user.getId()).name(user.getName())
+                    .role(user.getRole()).email(user.getEmail()).build();
+            if(user.getTeam() != null){
+                var userTeamResponse = UserTeamResponse.builder().id(user.getTeam().getId()).name(user.getTeam().getName()).build();
+                userResponse.setTeam(userTeamResponse);
+            }
+
+            userResponses.add(userResponse);
+        }
+        return userResponses;
     }
 
 }

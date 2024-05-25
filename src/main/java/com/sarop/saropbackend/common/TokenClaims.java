@@ -11,7 +11,7 @@ public enum TokenClaims {
     USER_ID("userId"),
     NAME("name"),
 
-
+    TEAM_NAME("teamName"),
     MAIL("mail"),
     USER_STATUS("userStatus"),
     ROLE_NAME("roleName"),
