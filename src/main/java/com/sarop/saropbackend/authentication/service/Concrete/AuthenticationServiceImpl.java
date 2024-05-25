@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import org.springframework.security.oauth2.core.user.OAuth2User;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,10 +64,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Transactional
-    public AuthenticationResponse login(LoginRequest request) {
+    public AuthenticationResponse login(LoginRequest request) throws Exception {
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()-> new UserNotFoundException());
-        if(user.getStatus() == UserStatus.VERIFIED){
+        if(passwordEncoder.matches(request.getPassword(),user.getPassword()) && user.getStatus() == UserStatus.VERIFIED){
             var jwtToken = jwtService.generateToken(user);
             var refreshToken = jwtService.generateRefreshToken(user);
 
@@ -75,7 +75,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build();
-        }else{
+        }else if(!passwordEncoder.matches(request.getPassword(),user.getPassword())){
+            throw new Exception("Email or password is wrong");
+        }
+        else{
             throw new UserNotVerifiedException();
         }
     }
