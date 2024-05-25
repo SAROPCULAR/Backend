@@ -45,6 +45,7 @@ public class NoteServiceImpl implements NoteService {
             NoteUserResponse noteUserResponse = new NoteUserResponse();
             noteUserResponse.setId(note.getUser().getId());
             noteUserResponse.setEmail(note.getUser().getEmail());
+            noteUserResponse.setName(note.getUser().getName());
             noteResponse.setUser(noteUserResponse);
             NoteMapResponse noteMapResponse = new NoteMapResponse();
             noteMapResponse.setId(note.getMap().getId());

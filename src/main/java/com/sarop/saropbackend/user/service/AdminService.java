@@ -2,6 +2,7 @@ package com.sarop.saropbackend.user.service;
 
 import com.sarop.saropbackend.user.dto.UserSaveRequest;
 import com.sarop.saropbackend.user.dto.UserUpdateRequest;
+import com.sarop.saropbackend.user.dto.responses.UserResponse;
 import com.sarop.saropbackend.user.model.User;
 
 import java.util.List;
@@ -15,5 +16,5 @@ public interface AdminService {
     void deleteUser(String id);
 
     void verifyUser(String id);
-    List<User> findAllNotVerifiedUsers(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName);
+    List<UserResponse> findAllNotVerifiedUsers(Optional<String> email, Optional<String> id, Optional<String> name, Optional<String> teamName);
 }
