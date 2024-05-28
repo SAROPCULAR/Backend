@@ -285,25 +285,35 @@ public class TeamServiceImpl implements TeamService {
     public void deleteTeam(String id) {
             Team team = teamRepository.findById(id).orElseThrow();
 
-            // Explicitly delete TeamLocations associated with the Team
-            for (TeamLocation location : team.getTeamLocations()) {
-                location.setTeam(null);
-                teamLocationRepository.save(location);
+            if(team.getTeamLocations() != null){
+                for (TeamLocation location : team.getTeamLocations()) {
+                    location.setTeam(null);
+                    teamLocationRepository.save(location);
+                }
+
             }
+            // Explicitly delete TeamLocations associated with the Team
 
             // Explicitly delete Operations associated with the Team
-            for (Operation operation : team.getOperations()) {
-                operation.setTeam(null);
-                operationRepository.save(operation);
-            }
-            User teamLeader = team.getTeamLeader();
-            teamLeader.setRole(Role.USER);
-            // Remove team reference from Users (avoid deleting Users)
-            for (User user : team.getMembers()) {
-                user.setTeam(null);
-                userRepository.save(user); // Update the User entity
+            if(team.getOperations() != null){
+                for (Operation operation : team.getOperations()) {
+                    operation.setTeam(null);
+                    operationRepository.save(operation);
+                }
             }
 
+            if(team.getTeamLeader() != null){
+                User teamLeader = team.getTeamLeader();
+                teamLeader.setRole(Role.USER);
+            }
+
+            // Remove team reference from Users (avoid deleting Users)
+            if(team.getMembers() != null){
+                for (User user : team.getMembers()) {
+                    user.setTeam(null);
+                    userRepository.save(user); // Update the User entity
+                }
+            }
             // Finally, delete the Team entity
             teamRepository.delete(team);
 

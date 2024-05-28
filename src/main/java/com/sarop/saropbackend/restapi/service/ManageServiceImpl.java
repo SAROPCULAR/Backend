@@ -24,6 +24,7 @@ import com.sarop.saropbackend.restapi.repository.WorkspaceRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -136,13 +137,12 @@ public class ManageServiceImpl implements ManageService {
 
 
 
-
+   @Transactional
     public void deleteWorkSpace(String workSpaceName) {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName;
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
-
         workspaceRepository.deleteByName(workSpaceName);
     }
 
@@ -203,7 +203,7 @@ public class ManageServiceImpl implements ManageService {
         return mapResponses;
     }
 
-
+    @Transactional
     public void deleteLayer(String workSpaceName, String layerName) {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -211,13 +211,16 @@ public class ManageServiceImpl implements ManageService {
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
         Workspace workspace = workspaceRepository.findWorkspaceByName(workSpaceName);
         Map map = mapRepository.findMapByMapNameAndAndWorkspace(layerName,workspace);
+        workspace.getMaps().remove(map);
         if(map.getNotes() != null){
             for(Note note : map.getNotes()){
+                note.setMap(null);
                 noteRepository.delete(note);
             }
         }
         if(map.getPolygons() != null){
             for(Polygon polygon: map.getPolygons()){
+                polygon.setMap(null);
                 polygonRepository.delete(polygon);
             }
         }
