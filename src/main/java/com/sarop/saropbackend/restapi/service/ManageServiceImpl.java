@@ -145,7 +145,58 @@ public class ManageServiceImpl implements ManageService {
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
         workspaceRepository.deleteByName(workSpaceName);
     }
+    public List<MapResponse> getLayers(){
+        List<MapResponse> mapResponses = new ArrayList<>();
+        List<Map> maps = mapRepository.findAll();
+        for(Map map : maps){
+            MapResponse mapResponse = MapResponse.builder().id(map.getId()).mapName(map.getMapName())
+                    .mapType(map.getMapType()).mapDescription(map.getMapDescription())
+                    .displayUrl(map.getDisplayUrl()).notes(new ArrayList<>()).operations(new ArrayList<>())
+                    .polygons(new ArrayList<>()).workspace(new MapWorkspaceResponse()).build();
+            MapWorkspaceResponse mapWorkspaceResponse = new MapWorkspaceResponse();
+            mapWorkspaceResponse.setId(map.getWorkspace().getId());
+            mapWorkspaceResponse.setName(map.getWorkspace().getName());
+            mapResponse.setWorkspace(mapWorkspaceResponse);
+            if(map.getOperations() != null && !map.getOperations().isEmpty()){
+                for(Operation operation : map.getOperations()){
+                    MapOperationResponse mapOperationResponse = new MapOperationResponse();
+                    mapOperationResponse.setId(operation.getId());
+                    mapOperationResponse.setName(operation.getName());
+                }
+            }
+            if(map.getPolygons() != null && !map.getPolygons().isEmpty()){
+                for(Polygon polygon : map.getPolygons()){
+                    MapPolygonResponse mapPolygonResponse = new MapPolygonResponse();
+                    mapPolygonResponse.setId(polygon.getId());
+                    mapPolygonResponse.setCoordinates(new ArrayList<>());
+                    for(Coordinate coordinate : polygon.getCoordinates()){
+                        CoordinateResponse coordinateResponse = new CoordinateResponse();
+                        coordinateResponse.setId(coordinate.getId());
+                        coordinateResponse.setX(coordinate.getX());
+                        coordinateResponse.setY(coordinate.getY());
+                        mapPolygonResponse.getCoordinates().add(coordinateResponse);
+                    }
+                    mapResponse.getPolygons().add(mapPolygonResponse);
+                }
+            }
+            if(map.getNotes() != null && !map.getNotes().isEmpty()){
+                for(Note note: map.getNotes()){
+                    MapNoteResponse mapNoteResponse = new MapNoteResponse();
+                    mapNoteResponse.setId(note.getId());
+                    CoordinateResponse coordinateResponse = new CoordinateResponse();
+                    coordinateResponse.setId(note.getCoordinate().getId());
+                    coordinateResponse.setX(note.getCoordinate().getX());
+                    coordinateResponse.setY(note.getCoordinate().getY());
+                    mapNoteResponse.setCoordinate(coordinateResponse);
+                    mapResponse.getNotes().add(mapNoteResponse);
+                }
 
+            }
+            mapResponses.add(mapResponse);
+
+        }
+        return mapResponses;
+    }
     public List<MapResponse> getLayersByWorkspaces(String workSpaceName, Optional<String> mapName) {
         List<MapResponse> mapResponses = new ArrayList<>();
         List<Map> maps = mapRepository.findAllByWorkspaceName(workSpaceName).stream()

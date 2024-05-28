@@ -182,14 +182,17 @@ public class TeamServiceImpl implements TeamService {
         team.setProvinceCode(teamUpdateRequest.getProvinceCode());
         team.setProvinceName(teamUpdateRequest.getProvinceName());
         team.setPhoneDescription(teamUpdateRequest.getPhoneDescription());
-        if(userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).isPresent()){
-            User teamLeader = userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).orElseThrow();
-            if (!teamLeader.equals(team.getTeamLeader())) {
-                team.getTeamLeader().setRole(Role.USER);
-                teamLeader.setRole(Role.OPERATION_ADMIN);
-                team.setTeamLeader(teamLeader);
+        if(team.getTeamLeader() != null){
+            if(userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).isPresent()){
+                User teamLeader = userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).orElseThrow();
+                if (!teamLeader.equals(team.getTeamLeader())) {
+                    team.getTeamLeader().setRole(Role.USER);
+                    teamLeader.setRole(Role.OPERATION_ADMIN);
+                    team.setTeamLeader(teamLeader);
+                }
             }
         }
+
 
         if(team.getTeamLocations() != null){
             for(TeamLocation teamLocation: team.getTeamLocations()){
