@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ManageService {
+
+    List<MapResponse> getLayers();
     List<WorkspaceResponse> getWorkSpaces(Optional<String> workspaceName);
     void postWorkspace(String workspaceName);
     void deleteWorkSpace(String workSpaceName);

@@ -45,6 +45,11 @@ public class ManageController {
         return ResponseEntity.ok().build();
 
     }
+    @GetMapping("/layers")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
+    public ResponseEntity<?> getLayers(){
+        return ResponseEntity.ok(manageService.getLayers());
+    }
     @GetMapping("/workspaces/{workspaceName}/layers")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<?> getLayer(@PathVariable("workspaceName") String workSpaceName,
