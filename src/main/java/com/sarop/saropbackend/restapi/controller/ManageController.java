@@ -31,7 +31,7 @@ public class ManageController {
 
 
     @PostMapping("/workspaces")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OPERATION_ADMIN')")
     public ResponseEntity<?> postWorkspace(@RequestBody WorkspaceRequest request) {
 
         manageService.postWorkspace(request.getWorkspaceName());
@@ -39,7 +39,7 @@ public class ManageController {
     }
 
     @DeleteMapping("/workspaces/{workspaceName}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OPERATION_ADMIN')")
     public ResponseEntity<?> deleteWorkSpace(@PathVariable("workspaceName") String workSpaceName) {
         manageService.deleteWorkSpace(workSpaceName);
         return ResponseEntity.ok().build();
@@ -51,7 +51,7 @@ public class ManageController {
         return ResponseEntity.ok(manageService.getLayers());
     }
     @GetMapping("/workspaces/{workspaceName}/layers")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER','OPERATION_ADMIN')")
     public ResponseEntity<?> getLayer(@PathVariable("workspaceName") String workSpaceName,
                                       @RequestParam(required = false)Optional<String> mapName
                                       ) {
@@ -59,14 +59,14 @@ public class ManageController {
         return ResponseEntity.ok(manageService.getLayersByWorkspaces(workSpaceName,mapName));
     }
     @DeleteMapping("/workspaces/{workspaceName}/layers/{layerName}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OPERATION_ADMIN')")
     public ResponseEntity<?> deleteLayer(@PathVariable("workspaceName") String workSpaceName,@PathVariable("layerName") String layerName) {
         manageService.deleteLayer(workSpaceName,layerName);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/workspaces/{workspaceName}/coveragestores")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','OPERATION_ADMIN')")
     public ResponseEntity<?> postCoverageStore(@PathVariable("workspaceName")String workspaceName, @RequestParam("layerName") String layerName,
                                                @RequestParam("description") String mapDescription,
                                                @RequestParam("file") MultipartFile file) {
