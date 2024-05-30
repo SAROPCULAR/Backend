@@ -130,13 +130,16 @@ public class TeamServiceImpl implements TeamService {
 
         // Save the team
         team = teamRepository.save(team);
-        if(userRepository.findByEmail(teamSaveRequest.getTeamLeaderEmail()).isPresent()){
-            User teamLeader = userRepository.findByEmail(teamSaveRequest.getTeamLeaderEmail()).orElseThrow();
-            teamLeader.setRole(Role.OPERATION_ADMIN);
-            team.setTeamLeader(teamLeader);
-            teamLeader.setTeam(team);
-            userRepository.save(teamLeader);
+        if(teamSaveRequest.getTeamLeaderEmail() != null){
+            if(userRepository.findByEmail(teamSaveRequest.getTeamLeaderEmail()).isPresent()){
+                User teamLeader = userRepository.findByEmail(teamSaveRequest.getTeamLeaderEmail()).orElseThrow();
+                teamLeader.setRole(Role.OPERATION_ADMIN);
+                team.setTeamLeader(teamLeader);
+                teamLeader.setTeam(team);
+                userRepository.save(teamLeader);
+            }
         }
+
 
         List<User> membersToSave = new ArrayList<>();
         if(teamSaveRequest.getUsers() != null){
@@ -190,6 +193,13 @@ public class TeamServiceImpl implements TeamService {
                     teamLeader.setRole(Role.OPERATION_ADMIN);
                     team.setTeamLeader(teamLeader);
                 }
+            }
+        }else{
+            if(userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).isPresent()) {
+                User teamLeader = userRepository.findByEmail(teamUpdateRequest.getTeamLeaderEmail()).orElseThrow();
+                teamLeader.setRole(Role.OPERATION_ADMIN);
+                team.setTeamLeader(teamLeader);
+
             }
         }
 
