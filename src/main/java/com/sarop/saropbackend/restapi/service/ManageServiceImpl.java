@@ -141,8 +141,12 @@ public class ManageServiceImpl implements ManageService {
     public void deleteWorkSpace(String workSpaceName) {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName;
+        String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName + "?recurse=true";
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+        Workspace workspace = workspaceRepository.findWorkspaceByName(workSpaceName);
+        for(Map map : workspace.getMaps()){
+            mapRepository.delete(map);
+        }
         workspaceRepository.deleteByName(workSpaceName);
     }
     public List<MapResponse> getLayers(){
@@ -259,6 +263,7 @@ public class ManageServiceImpl implements ManageService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String url = "http://localhost:8080/geoserver/rest/workspaces/" + workSpaceName + "/layers/" + layerName;
+
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
         Workspace workspace = workspaceRepository.findWorkspaceByName(workSpaceName);
         Map map = mapRepository.findMapByMapNameAndAndWorkspace(layerName,workspace);

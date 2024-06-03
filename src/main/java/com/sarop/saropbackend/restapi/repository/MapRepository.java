@@ -14,7 +14,7 @@ public interface MapRepository extends JpaRepository<Map,String> {
 
     Map findMapByMapNameAndAndWorkspace(String mapName, Workspace workspace);
 
-    Map findMapByMapName(String layerName);
+
 
 
 }
