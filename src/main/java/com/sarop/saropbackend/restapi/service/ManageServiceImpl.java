@@ -435,14 +435,16 @@ public class ManageServiceImpl implements ManageService {
         JSONObject jsonObject = new JSONObject(jsonString);
         JSONObject coverage = jsonObject.getJSONObject("coverage");
         JSONObject bbox = coverage.getJSONObject("nativeBoundingBox");
-
-
-        String layer = coverage.getString("name");
         double minx = bbox.getDouble("minx");
         double maxx = bbox.getDouble("maxx");
         double miny = bbox.getDouble("miny");
         double maxy = bbox.getDouble("maxy");
-        String srs = bbox.getJSONObject("crs").getString("$").replace(":","%3A");
+        String srs;
+        if (bbox.get("crs") instanceof JSONObject) {
+            srs = bbox.getJSONObject("crs").getString("$").replace(":", "%3A");
+        } else {
+            srs = bbox.getString("crs").replace(":", "%3A");
+        }
         //http://localhost:8080/geoserver/MyWorkspace19/wms?service=WMS&version=1.1.0&request=GetMap&layers=MyWorkspace19%3AECWJPEG&bbox=-0.5%2C-0.5%2C4805.5%2C4805.5&width=768&height=768&srs=EPSG%3A404000&styles=&format=application/openlayers
         // Construct WMS display URL
         String displayUrl = "http://localhost:8080/geoserver/" +workspaceName+"/wms?service=WMS&version=1.1.0&request=GetMap&layers=" + workspaceName+"%3A" + layerName+"&bbox="+
