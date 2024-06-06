@@ -44,7 +44,7 @@ public class Operation {
     @JoinColumn(name="team_id")
     private Team team;
 
-    @ManyToMany( fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "operation_map",
             joinColumns = @JoinColumn(name = "operation_id"),
